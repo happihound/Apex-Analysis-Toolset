@@ -37,7 +37,7 @@ def packKeyPoints(ratio, gameMap):
 
 
 def process_args(args):
-    if "debug" in args or True:
+    if "debug" in args or False:
         print("Debug mode")
         packKeyPoints('4by3', 'KC')
 

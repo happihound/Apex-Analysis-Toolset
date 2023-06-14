@@ -51,14 +51,14 @@ class miniMapPlotter:
 
     def setMap(self, map):
         self.map = map
-        self.mapPath = 'packedKeypoints/'+self.ratio+'/'+self.map+self.ratio+'KeyPoints.npy'
+        self.mapPath = 'internal/packedKeypoints/'+self.ratio+'/'+self.map+self.ratio+'KeyPoints.npy'
 
     def setRatio(self, ratio):
         self.ratio = ratio
         self.setMap(self.map)
 
     def main(self):
-        self.gameMap = cv2.imread('maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
+        self.gameMap = cv2.imread('internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
         process1 = multiprocessing.Process(target=self.miniMapPlotter, args=(self.queuedImage,))
         process2 = multiprocessing.Process(target=self.display, args=(self.queuedImage,))
         process1.start()
@@ -209,9 +209,9 @@ class miniMapPlotter:
 
 if __name__ == '__main__':
     print('Starting MiniMap Matching')
-    args = sys.argv
+    #args = sys.argv
     # Debug arguments for testing
-    # args = ['miniMapPlotting.py', '-mapName=WE', '-ratio=4by3']
+    args = ['miniMapPlotting.py', '-mapName=WE', '-ratio=4by3']
     # Check if the user has entered the correct number of arguments
     if len(args) == 1:
         print("Command format:")

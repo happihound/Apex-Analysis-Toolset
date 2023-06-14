@@ -8,27 +8,24 @@ for file in glob.glob("videos/" + '/*.mp4'):
     fileName = os.path.basename(file)
 stream = ffmpeg.input("videos/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
 # output path for all the various parts of the frames
-outputKillFeed = 'inputData/killFeed/'
-outputMiniMap = 'inputData/MiniMap/'
-outputPlayerDamage = 'inputData/PlayerDamage/'
-outputPlayerEvo = 'inputData/PlayerEvo/'
-outputPlayerGuns = 'inputData/PlayerGuns/'
-outputPlayerHealth = 'inputData/PlayerHealth/'
-outputPlayerKills = 'inputData/PlayerKills/'
-outputKPlayerShield = 'inputData/PlayerShield/'
-outputPlayerTac = 'inputData/PlayerTac/'
-outputPlayerUlt = 'inputData/PlayerUlt/'
-outputTeammate1Health = 'inputData/Teammate1Health/'
-outputTeammate1Shield = 'inputData/Teammate1Shield/'
-outputTeammate2Health = 'inputData/Teammate2Health/'
-outputTeammate2Shield = 'inputData/Teammate2Shield/'
-outputWholeImage = 'inputData/WholeImage/'
-outputZoneTimer = 'inputData/ZoneTimer/'
+outputKillFeed = 'input/killFeed/'
+outputMiniMap = 'input/MiniMap/'
+outputPlayerDamage = 'input/PlayerDamage/'
+outputPlayerEvo = 'input/PlayerEvo/'
+outputPlayerGuns = 'input/PlayerGuns/'
+outputPlayerHealth = 'input/PlayerHealth/'
+outputPlayerKills = 'input/PlayerKills/'
+outputKPlayerShield = 'input/PlayerShield/'
+outputPlayerTac = 'input/PlayerTac/'
+outputPlayerUlt = 'input/PlayerUlt/'
+outputTeammate1Health = 'input/Teammate1Health/'
+outputTeammate1Shield = 'input/Teammate1Shield/'
+outputTeammate2Health = 'input/Teammate2Health/'
+outputTeammate2Shield = 'input/Teammate2Shield/'
+outputWholeImage = 'input/WholeImage/'
+outputZoneTimer = 'input/ZoneTimer/'
 # run the cropping procedure on all parts simultaneously
 
-decomp = ffmpeg.output(stream, 'OTHER/test1/' + 'image_%04d.png')
-ffmpeg.run_async(decomp)
-exit()
 
 killFeed = ffmpeg.output(ffmpeg.crop(stream, 1387, 155, 433, 100), outputKillFeed + 'killFeed%04d.png')
 ffmpeg.run_async(killFeed)

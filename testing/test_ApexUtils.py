@@ -33,6 +33,7 @@ def test_save_file_exists():
 
     with pytest.raises(FileExistsError):
         utils.save(data, frame, headers, filename, debug=True)
+    delete_test_files()
 
 
 def test_save_no_data():
@@ -43,6 +44,7 @@ def test_save_no_data():
 
     with pytest.raises(Exception):
         utils.save(data, frame)
+    delete_test_files()
 
 
 def test_save_no_name():
@@ -55,6 +57,7 @@ def test_save_no_name():
     with patch('builtins.print') as mock_print:
         utils.save(data, frame, headers, debug=True)
         assert os.path.exists("outputdata/test_default.csv")
+    delete_test_files()
 
 
 def test_save_file_not_found():
@@ -67,6 +70,7 @@ def test_save_file_not_found():
 
     with pytest.raises(FileNotFoundError):
         utils.save(data, frame, headers, filename, debug=True)
+    delete_test_files()
 
 
 def delete_test_files():
