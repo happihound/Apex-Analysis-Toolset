@@ -5,7 +5,7 @@ import glob
 import multiprocessing
 import easyocr
 from tqdm import tqdm
-import apexUtils
+import ApexUtils
 import numpy as np
 
 plt.switch_backend('TKAgg')
@@ -25,7 +25,7 @@ class DamageTracker:
         self.results = [0]
         self.result_image_number = [0]
         self.reader = None
-        self.apex_utils = apexUtils.apexUtils()
+        self.apex_utils = ApexUtils.ApexUtils()
         self.path_to_images = 'input/playerDamage'
 
     def track_damage(self, queued_image, end):
@@ -40,11 +40,10 @@ class DamageTracker:
                 result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
                 if self.process_result(result_OCR, pbar):
                     self.queued_image.put(image)
-                    self.match_count += 1
         print(f'found {self.match_count} total matches')
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Damage"], name='Player Damage')
-        self.end.value = 1
+        end.value = True
 
     def crop_to_first_white_line(self, thresh):
         matched_pixels, matched_columns = 0, 0
