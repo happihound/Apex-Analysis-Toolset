@@ -26,10 +26,10 @@ class miniMapPlotter:
         self.images = []
         self.results = []
         self.resultImageNumber = []
-        self.mapFolderPath = 'input/'
-        self.outputMapPath = 'output/'
+        self.mapFolderPath = 'input/minimap/'
+        self.outputMapPath = 'outputData/'
         # Minimum number of matching key points between two image
-        self.MIN_MATCH_COUNT = 12
+        self.MIN_MATCH_COUNT = 13
         # Initialize the feature mapping algorithm and matcher
         self.featureMappingAlgMiniMap = None
         self.featureMatcher = None
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     print('Starting MiniMap Matching')
     #args = sys.argv
     # Debug arguments for testing
-    args = ['miniMapPlotting.py', '-mapName=WE', '-ratio=4by3']
+    args = ['miniMapPlotting.py', '-mapName=OLY', '-ratio=4by3']
     # Check if the user has entered the correct number of arguments
     if len(args) == 1:
         print("Command format:")

@@ -25,7 +25,7 @@ def packKeyPoints(ratio, gameMap):
     print(f'Packing Keypoints for {gameMap} {ratio} map')
     editedImage = cv2.imread(f'internal/maps/{ratio}/map{gameMap}{ratio}.jpg')
 
-    featureMappingAlg = cv2.SIFT_create(nOctaveLayers=25, nfeatures=250000)
+    featureMappingAlg = cv2.SIFT_create(nOctaveLayers=35, nfeatures=250000)
     kp1, des1 = featureMappingAlg.detectAndCompute(editedImage, None)
 
     kpts = np.array([[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kp1])
