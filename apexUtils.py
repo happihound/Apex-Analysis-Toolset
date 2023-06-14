@@ -25,7 +25,7 @@ class ApexUtils:
                 cv2.imshow(window_name, queued_image.get())
             cv2.waitKey(1)
 
-    def save(self, data, frame, headers=None, name='default'):
+    def save(self, data, frame, headers=None, name='default', debug=False):
         '''Saves data as a csv file
         data: list of data to be saved
         frame: frame number of the data
@@ -34,10 +34,15 @@ class ApexUtils:
         '''
         if data is None or frame is None:
             print("No data to save!")
-            return
-        if not name:
-            print("No name given, trying to save as default.csv")
-            name = 'default'
+            raise Exception
+        try:
+            if not name:
+                print("No name given, trying to save as default.csv")
+                name = 'default'
+            if debug:
+                name = f"test_{name}"
+        except FileExistsError:
+            pass
         try:
             with open(f'outputdata/{name}.csv', 'x', newline='') as file:
                 if headers is None:
@@ -49,5 +54,7 @@ class ApexUtils:
                 print(f"Saved as {name}.csv")
         except FileExistsError:
             print(f"{name}.csv already exists, it will not be overwritten!")
+            raise FileExistsError
         except FileNotFoundError:
             print("Save failed! Please check that the outputdata folder exists")
+            raise FileNotFoundError
