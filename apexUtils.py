@@ -54,7 +54,7 @@ class ApexUtils:
                 print(f"Saved as {name}.csv")
         except FileExistsError:
             print(f"{name}.csv already exists, it will not be overwritten!")
-            raise FileExistsError
+            raise FileExistsError("File already exists")
         except FileNotFoundError:
             print("Save failed! Please check that the outputdata folder exists")
-            raise FileNotFoundError
+            raise FileNotFoundError("Folder not found")

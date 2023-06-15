@@ -40,6 +40,7 @@ class evoTracker:
                 result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
                 if self.process_result(result_OCR, pbar):
                     self.queued_image.put(image)
+        self.filter_Values(self.results)
         print(f'found {self.match_count} total matches')
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Evo"], name='Evo')
@@ -47,69 +48,50 @@ class evoTracker:
 
     def process_result(self, result_OCR, pbar):
         for bbox, text, prob in result_OCR:
+            if text == '':
+                continue
             evo_found = int(text)
-            if prob > 0.93 and self.is_valid_damage(evo_found, pbar):
+            if prob > 0.93 and self.is_valid_evo(evo_found):
                 self.match_count += 1
                 self.results.append(evo_found)
                 self.result_image_number.append(self.loop_number)
-                pbar.set_description(desc=str(self.match_count), refresh=True)
+                try:
+                    pbar.set_description(desc=str(self.match_count), refresh=True)
+                except:
+                    pass
                 return True
         return False
 
-    def is_valid_evo(self, evo_found, pbar):
-        if self.results[-1] > evo_found or self.results[-1] + 400 < evo_found:
-            pbar.write(f'Bad match, found {evo_found} but expected closer to '
-                       f'{self.results[-1]} at image {self.loop_number}')
+    def is_valid_evo(self, evo_found):
+        if (evo_found > 750):
+            return False
+        if (evo_found < 0):
+            return False
+        if (evo_found == 0):
             return False
         return True
-    
-    def filterValues(values):
+
+    def filter_Values(self, values):
         # Make a copy of the list to avoid changing the original
         newValues = values.copy()
-
         # Loop through the list, skipping the first and last values
         for i in range(1, len(values) - 1):
             # If the next value is the same as the previous value, set the current value to that value
             if values[i - 1] == values[i + 1]:
                 newValues[i] = values[i - 1]
-
+            self.match_count = len(newValues)
         # Return the new list
-        return newValues
-
-
-def check_match(result, loopNumber, foundData, imageNumber, pbar, matchCount):
-    # For each result in the result list
-    for (bbox, text, prob) in result:
-        # If there is no text ignore it
-        if not text:
-            continue
-        # Convert the text to a number
-        evoFound = int(text)
-        # Needs at 98% or great probability of being accurate
-        if (prob > 0.98):
-            # Max value of an EVO
-            if (evoFound > 751):
-                print('bad match, over 750')
-                continue
-            # Update the progress bar
-            pbar.set_description(desc=str(matchCount), refresh=True)
-            # Add the data to the lists
-            foundData.append(evoFound)
-            imageNumber.append(loopNumber)
-            # Return true to say we found a match
-            return True
-    # Return false to say we didn't find a match
-    return False
+        self.results = newValues
 
     def main(self):
-        print('Starting damage tracker')
+        print('Starting evo tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
-        self.apex_utils.display(queued_image, end, 'Damage Tracker')
-        self.track_damage(queued_image, end)
-        print('Finished damage tracker')
+        self.apex_utils.display(queued_image, end, 'Evo Tracker')
+        self.track_evo(queued_image, end)
+        print('Finished evo tracker')
 
 
 if __name__ == '__main__':
-    damage_tracker = DamageTracker()
-    damage_tracker.main()
+    evoTracker = evoTracker()
+    evoTracker.main()

@@ -46,15 +46,8 @@ class DamageTracker:
         end.value = True
 
     def crop_to_first_white_line(self, thresh):
-        matched_pixels, matched_columns = 0, 0
-        for i in range(thresh.shape[1]):
-            if thresh[0, i] == 255:
-                matched_columns += 1
-                matched_pixels += np.sum(thresh[:, i] == 255)
-                if matched_pixels <= thresh.shape[0] * 0.8:
-                    matched_columns, matched_pixels = 0, 0
-            if matched_columns > 3:
-                return thresh[:, i-3:]
+        #todo: implement
+        pass
 
     def process_result(self, result_OCR, pbar):
         for bbox, text, prob in result_OCR:
