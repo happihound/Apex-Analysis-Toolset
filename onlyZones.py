@@ -36,6 +36,7 @@ class onlyZones:
         self.plot_invalid_zones()
         self.fig.canvas.draw()
         self.load_user_map()
+        self.ax2.imshow(self.map_image)
         self.show_with_cv2()
 
     def load_map(self):
@@ -91,7 +92,7 @@ class onlyZones:
         for zone in self.invalid_zones:
             x = zone[0]
             y = zone[1]
-            radius = zone[2]*1.4
+            radius = zone[2]
             #print("x: " + str(x) + " y: " + str(y) + " radius: " + str(radius))
             #self.ax2.scatter(x, y, s=radius, color='red')
             self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (255, 0, 0), 5)
@@ -105,7 +106,7 @@ class onlyZones:
         for zone in self.valid_zones:
             x = zone[0]
             y = zone[1]
-            radius = zone[2]*1.4
+            radius = zone[2]
             #print("x: " + str(x) + " y: " + str(y) + " radius: " + str(radius))
             #self.ax2.scatter(x, y, s=radius, color='green')
             self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (0, 255, 0), 5)
@@ -124,9 +125,9 @@ class onlyZones:
     def show_with_cv2(self):
         cv2.namedWindow("User Map", cv2.WINDOW_NORMAL)
         self.map_image = cv2.cvtColor(self.map_image, cv2.COLOR_BGR2RGB)
-        self.map_image = cv2.resize(self.map_image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
-        cv2.imshow("User Map", self.map_image)
-        cv2.waitKey(0)
+        self.map_image = cv2.resize(self.map_image, (2048, 2048), interpolation=cv2.INTER_AREA)
+        #cv2.imshow("User Map", self.map_image)
+        # cv2.waitKey(0)
 
     def main(self):
         plt.show(block=True)
