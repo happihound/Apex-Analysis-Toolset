@@ -3,10 +3,8 @@ import cv2 as cv2
 import matplotlib.pyplot as plt
 import glob
 import multiprocessing
-import pytesseract
 import jellyfish
 import easyocr
-import time
 from tqdm import tqdm
 from networkx.algorithms import similarity
 plt.switch_backend('TKAgg')
@@ -31,7 +29,7 @@ def playerGunFinder(pathToImages, queuedImage):
         image = all_Images[loopNumber - 1]
         # Possible gun names
         gunList = ['R-301', 'HEMLOK', 'FLATLINE', 'HAVOC', 'SPITFIRE', 'DEVOTION', 'RAMPAGE', 'L-STAR', 'BOCEK', 'G7 SCOUT', 'TRIPLE TAKE', '30-30', 'PEACEKEEPER',
-                   'MASTIFF', 'EVA-8', 'MOZAMBIQUE', 'CAR', 'R-99', 'PROWLER', 'VOLT', 'ALTERNATOR', 'WINGMAN', 'RE-45', 'P2020', 'LONGBOW', 'SENTINEL', 'KRABER', 'CHARGE RIFLE', ]
+                   'MASTIFF', 'EVA-8', 'MOZAMBIQUE', 'CAR', 'R-99', 'PROWLER', 'VOLT', 'ALTERNATOR', 'WINGMAN', 'RE-45', 'P2020', 'LONGBOW', 'SENTINEL', 'KRABER', 'CHARGE RIFLE', 'NEMESIS']
         result = reader.readtext(
             image, paragraph=False, allowlist='012345789ABCDEFGHIJKLMNOPQRSTUVWZ-')
         if len(result) == 2:
@@ -46,13 +44,6 @@ def playerGunFinder(pathToImages, queuedImage):
 
     save(foundData, imageNumber)
     print('DONE MATCHING')
-
-
-def save(foundData, imageNumber):
-    np.save('outputdata/playerGunsData.npy',
-            np.vstack((foundData, imageNumber)))
-
-    # Check similarity with large bias toward close character count
 
 
 def similar(inputStringOne, inputStringTwo):
@@ -74,27 +65,6 @@ def gunSimlarityChecker(guns, inputString):
             largestProbValue = gunSimlarity
             predictedGun = gun
     return predictedGun
-
-
-def graph(gunListMatches):
-    gunListMatches = filterValues(gunListMatches)
-    lii_unique = list(set(gunListMatches))
-    counts = [gunListMatches.count(value) for value in lii_unique]
-    loopNumber = 0
-    for absoluteCounts in counts:
-        counts[loopNumber] = (absoluteCounts / len(gunListMatches)) * 200
-        loopNumber = loopNumber + 1
-    barcontainer = plt.bar(range(len(lii_unique)), counts)
-    plt.bar_label(barcontainer, lii_unique, label_type='edge')
-    plt.xlabel('Percentage of time equipped')
-    loopNumber = 0
-    for value in counts:
-        plt.annotate((str(int(value)) + '%'), xy=(loopNumber,
-                                                  value - 2), ha='center', va='bottom')
-        loopNumber = loopNumber + 1
-    plt.xticks([])
-    plt.show()
-    plt.pause(999999)
 
 
 def filterValues(values):
@@ -127,15 +97,6 @@ def remove_values_from_list(the_list, val):
             values.append(i)
     return values
 
-
-def display(queuedImage):
-    cv2.namedWindow('guns')
-    cv2.imshow("guns", cv2.imread('inputData/default.png'))
-    while True:
-        if not queuedImage.empty():
-            cv2.imshow("guns", queuedImage.get())
-            continue
-        cv2.waitKey(1)
 
 
 if __name__ == '__main__':
