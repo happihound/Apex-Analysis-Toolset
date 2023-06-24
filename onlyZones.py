@@ -94,7 +94,7 @@ class onlyZones:
             radius = zone[2]*1.4
             #print("x: " + str(x) + " y: " + str(y) + " radius: " + str(radius))
             #self.ax2.scatter(x, y, s=radius, color='red')
-            self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (255, 0, 0), 2)
+            self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (255, 0, 0), 5)
 
     def plot_valid_zones(self) -> None:
         self.load_valid_zones()
@@ -108,7 +108,7 @@ class onlyZones:
             radius = zone[2]*1.4
             #print("x: " + str(x) + " y: " + str(y) + " radius: " + str(radius))
             #self.ax2.scatter(x, y, s=radius, color='green')
-            self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (0, 255, 0), 2)
+            self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (0, 255, 0), 5)
 
     def extract_zone(self):
         pass
