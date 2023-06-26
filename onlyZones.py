@@ -61,23 +61,30 @@ class onlyZones:
         radius_array = []
         print(file)
         with open(file[0]) as f:
-            for lineNumber, line in enumerate(f):
+            for line in f:
+                line = line.strip().strip(" ").strip("\n").strip("[").strip("]")
                 split = line.split(",")
-                locationOfCharsInText = split[0].index("[{")
-                split[0] = split[0][locationOfCharsInText:]
-                for value in split:
-                    value = value.strip("[{}]")
-                    if "x" in value:
-                        temp_x = float(value.strip('x":'))/4
-                        #temp_x = abs(temp_x-4096)
-                        x_array.append(temp_x)
-                    elif "y" in value:
-                        temp_y = float(value.strip('y":'))/4
-                        #temp_y = abs(temp_y-4096)
-                        y_array.append(temp_y)
-                    elif "radius" in value:
-                        temp_radius = float(value.strip('radius":'))/4
-                        radius_array.append(temp_radius)
+                print("x: " + str(split[0]) + " y: " + str(split[1]) + " radius: " + str(split[2]))
+
+                max_x = 42560
+                max_y = 42560
+                min_x = -42560
+                min_y = -42560
+
+                map_x = 4096
+                map_y = 4096
+
+                scale_x = map_x / (max_x - min_x)
+                scale_y = map_y / (max_y - min_y)
+
+                scale_factor = 0.945
+
+                x_coord = int((float(split[0])*scale_factor - min_x) * scale_x)
+                y_coord = int((-float(split[1])*scale_factor - min_y) * scale_y)
+                x_array.append(x_coord)
+                y_array.append(y_coord)
+                radius_array.append(int(float(split[2])*scale_factor/19))
+
 
         for i in range(len(x_array)):
             returnArray.append([x_array[i], y_array[i], radius_array[i]])
@@ -126,8 +133,8 @@ class onlyZones:
         cv2.namedWindow("User Map", cv2.WINDOW_NORMAL)
         self.map_image = cv2.cvtColor(self.map_image, cv2.COLOR_BGR2RGB)
         self.map_image = cv2.resize(self.map_image, (2048, 2048), interpolation=cv2.INTER_AREA)
-        #cv2.imshow("User Map", self.map_image)
-        # cv2.waitKey(0)
+        cv2.imshow("User Map", self.map_image)
+        cv2.waitKey(0)
 
     def main(self):
         plt.show(block=True)
