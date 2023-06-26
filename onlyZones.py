@@ -10,9 +10,10 @@ from userMapImage import userMapImage
 
 class onlyZones:
 
-    __slots__ = ['mapName', 'invalid_zones', 'valid_zones', 'map_image', 'fig', 'ax1', 'ax2', 'ratio']
+    __slots__ = ['mapName', 'invalid_zones', 'valid_zones', 'map_image',
+                 'fig', 'ax1', 'ax2', 'ratio', 'user_map_image1', 'user_map_image2']
 
-    def __init__(self, mapName, ratio):
+    def __init__(self, mapName, ratio="4by3"):
         self.mapName = mapName
         self.map_image = None
         self.invalid_zones = []
@@ -20,6 +21,8 @@ class onlyZones:
         self.map_image = None
         self.load_map()
         self.load_invalid_zones()
+        self.user_map_image1 = None
+        self.user_map_image2 = None
         self.load_valid_zones()
         self.fig = None
         self.ax1 = None
@@ -32,12 +35,14 @@ class onlyZones:
         win.setFixedSize(800, 600)
         self.ax2.imshow(self.map_image)
         self.ax2.set_title('Map')
-        self.plot_valid_zones()
-        self.plot_invalid_zones()
+        # self.plot_valid_zones()
+        # self.plot_invalid_zones()
         self.fig.canvas.draw()
         self.load_user_map()
         self.ax2.imshow(self.map_image)
-        self.show_with_cv2()
+        # self.show_with_cv2()
+        self.extract_zone()
+        self.fig.canvas.draw()
 
     def load_map(self):
         try:
@@ -64,7 +69,7 @@ class onlyZones:
             for line in f:
                 line = line.strip().strip(" ").strip("\n").strip("[").strip("]")
                 split = line.split(",")
-                print("x: " + str(split[0]) + " y: " + str(split[1]) + " radius: " + str(split[2]))
+                #print("x: " + str(split[0]) + " y: " + str(split[1]) + " radius: " + str(split[2]))
 
                 max_x = 42560
                 max_y = 42560
@@ -84,7 +89,6 @@ class onlyZones:
                 x_array.append(x_coord)
                 y_array.append(y_coord)
                 radius_array.append(int(float(split[2])*scale_factor/19))
-
 
         for i in range(len(x_array)):
             returnArray.append([x_array[i], y_array[i], radius_array[i]])
@@ -118,22 +122,35 @@ class onlyZones:
             #self.ax2.scatter(x, y, s=radius, color='green')
             self.map_image = cv2.circle(self.map_image, (int(x), int(y)), int(radius), (0, 255, 0), 5)
 
-    def extract_zone(self):
-        pass
-
     def load_user_map(self):
         image_path = glob.glob(f'input/mapScreenShot/*.png')
-        image = cv2.imread(image_path[0], cv2.IMREAD_UNCHANGED)
-        #userMapImage1 = userMapImage(image, "4:3")
-        cv2.namedWindow("User Map", cv2.WINDOW_NORMAL)
-        #cv2.resizeWindow("User Map", 800, 600)
-        #cv2.imshow("User Map", userMapImage1.getThresheldImage().image())
+        print(image_path)
+        image2 = cv2.imread(image_path[0], cv2.IMREAD_UNCHANGED)
+        image1 = cv2.imread(image_path[1], cv2.IMREAD_UNCHANGED)
+        userMapImage1 = userMapImage(image2, self.ratio)
+        userMapImage2 = userMapImage(image1, self.ratio)
+        print(userMapImage1.getOriginalImage().ratio())
+        print(userMapImage2.getOriginalImage().ratio())
+        self.user_map_image1 = userMapImage1
+        self.user_map_image2 = userMapImage2
+        #cv2.imshow("User Map", self.user_map_image1.getCroppedImage())
+
+    def extract_zone(self):
+        circles = self.user_map_image1.extractZone()
+        self.ax2.imshow(self.user_map_image1.getCroppedImage().image())
+        for circle in circles:
+            self.map_image = cv2.circle(self.user_map_image1.getCroppedImage().image(), (int(
+                circle[0]), int(circle[1])), int(circle[2]), (0, 0, 255), 5)
+        self.ax2.imshow(self.map_image)
+        self.fig.canvas.draw()
+
+
 
     def show_with_cv2(self):
         cv2.namedWindow("User Map", cv2.WINDOW_NORMAL)
-        self.map_image = cv2.cvtColor(self.map_image, cv2.COLOR_BGR2RGB)
-        self.map_image = cv2.resize(self.map_image, (2048, 2048), interpolation=cv2.INTER_AREA)
-        cv2.imshow("User Map", self.map_image)
+        image = cv2.cvtColor(self.user_map_image1.getCroppedImage().image(), cv2.COLOR_BGR2RGB)
+        image = cv2.resize(image, (2048, 2048), interpolation=cv2.INTER_AREA)
+        #cv2.imshow("User Map", image)
         cv2.waitKey(0)
 
     def main(self):
