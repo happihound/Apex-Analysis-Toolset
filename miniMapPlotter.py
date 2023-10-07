@@ -5,12 +5,13 @@ import cv2 as cv
 import cv2 as cv2
 import matplotlib.pyplot as plt
 import glob
+import cProfile
 import multiprocessing
 
 
 class miniMapPlotter:
     __slots__ = ['map', 'mapPath', 'gameMap', 'images', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queuedImage']
+                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queuedImage', 'end']
 
     def __init__(self):
         # Set up the live image preview window
@@ -48,6 +49,7 @@ class miniMapPlotter:
         self.color = (225, 0, 255)
         self.lineThickness = 3
         self.queuedImage = multiprocessing.Queue()
+        self.end = multiprocessing.Value('i', 0)
 
     def setMap(self, map):
         self.map = map
@@ -59,8 +61,8 @@ class miniMapPlotter:
 
     def main(self):
         self.gameMap = cv2.imread('internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
-        process1 = multiprocessing.Process(target=self.miniMapPlotter, args=(self.queuedImage,))
-        process2 = multiprocessing.Process(target=self.display, args=(self.queuedImage,))
+        process1 = multiprocessing.Process(target=self.miniMapPlotter, args=(self.queuedImage, self.end,))
+        process2 = multiprocessing.Process(target=self.display, args=(self.queuedImage, self.end,))
         process1.start()
         process2.start()
 
@@ -76,7 +78,7 @@ class miniMapPlotter:
         self.keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
                           for x, y, _size, _angle, _response, _octave, _class_id in list(self.tempKeyPoints)]
 
-    def miniMapPlotter(self, queuedImage):
+    def miniMapPlotter(self, queuedImage, end):
         self.featureMappingAlgMiniMap = cv.SIFT_create()
         self.featureMatcher = cv.BFMatcher_create(normType=cv.NORM_L2SQR)
         print('Starting matching')
@@ -106,6 +108,7 @@ class miniMapPlotter:
             sys.exit()
 
         self.save(line)
+        end.value = 1
         sys.exit()
 
     def editImage(self, queuedImage, line):
@@ -194,12 +197,14 @@ class miniMapPlotter:
             (-1, 1, 2))], False, self.color, self.lineThickness, cv.LINE_AA)
         finalOutputBase = cv2.cvtColor(finalOutputBase, cv2.COLOR_BGR2RGB)
         plt.imsave(self.outputMapPath + ' FINAL' + '.jpg', finalOutputBase)
+        print('Image save complete', end='\n\t')
+        print('Program complete', end='\n\t')
 
-    def display(self, queuedImage):
+    def display(self, queuedImage, end):
         print('Displaying', end='\n\t')
         cv2.namedWindow('mapImage', cv2.WINDOW_NORMAL)
         cv2.imshow("mapImage", self.gameMap)
-        while True:
+        while end.value == 0:
             if not queuedImage.empty():
                 imS = cv2.resize(queuedImage.get(), (1333, 1000))
                 cv2.imshow("mapImage", imS)
