@@ -5,7 +5,7 @@ import glob
 import multiprocessing
 import easyocr
 from tqdm import tqdm
-import ApexUtils
+from util.apexUtils import ApexUtils as util
 import numpy as np
 
 plt.switch_backend('TKAgg')
@@ -25,7 +25,7 @@ class evoTracker:
         self.results = [0]
         self.result_image_number = [0]
         self.reader = None
-        self.apex_utils = ApexUtils.ApexUtils()
+        self.apex_utils = util.ApexUtils()
         self.path_to_images = 'input/playerEvo'
 
     def track_evo(self, queued_image, end):

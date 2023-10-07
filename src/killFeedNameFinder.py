@@ -6,7 +6,7 @@ import glob
 import multiprocessing
 import jellyfish
 import easyocr
-import apexUtils
+from util.apexUtils import ApexUtils as util
 from tqdm import tqdm
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"
@@ -15,6 +15,7 @@ scale_percent = 200  # percent of original size
 
 
 def killFeedFinder(pathToImages, queuedImage):
+    apex_utils = util.ApexUtils()
     matchCount = 0
     averageProb = 0
     countForProb = 0
@@ -176,8 +177,7 @@ def main():
     queuedImage = multiprocessing.Queue()
     process1 = multiprocessing.Process(
         target=killFeedFinder, args=(pathToImages, queuedImage,))
-    apexUtils.display(queuedImage)
-    process2 = multiprocessing.Process(target=display, args=(queuedImage,))
+    process2 = multiprocessing.Process(target=(util.display), args=(queuedImage,))
     process1.start()
     process2.start()
 

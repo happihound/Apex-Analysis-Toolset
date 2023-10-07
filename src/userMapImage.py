@@ -64,52 +64,6 @@ class userMapImage:
         # Return the circles
         return circles
 
-    def __extractZone4by3(self) -> list:
-       # gray = cv.cvtColor(self.__croppedImage(), cv.COLOR_BGR2GRAY)
-     # Load the image
-        img = self.__croppedImage()
-
-        #do canny image detection
-        edges = cv.Canny(img, 100, 200)
-
-        #draw edges
-        cv.imshow("edges", edges)
-        cv.waitKey(0)
-
-        #find contours
-        contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
-  
-        M = cv.moments(max_contour)
-
-
-        # Display the result
-        cv.imshow("Result", result)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
-        # Apply a threshold to the image to create a binary image
-        # _, thresh = cv.threshold(gray, 127, 255, cv.THRESH_BINARY)
-        # cv.imshow("thresh", thresh)
-        # cv.waitKey(0)
-        # # Find contours in the binary image
-        # contours, _ = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-        # # Loop over the contours and find the one with the largest area
-        # max_area = 0
-        # max_contour = None
-        # for contour in contours:
-        #     area = cv.contourArea(contour)
-        #     if area > max_area:
-        #         max_area = area
-        #         max_contour = contour
-
-        # # Fit a circle to the contour
-        # (x, y), radius = cv.minEnclosingCircle(max_contour)
-        # center = (int(x), int(y))
-        # radius = int(radius)
-
-        # return [(center[0], center[1], radius)]
-
     def __remove(self, the_list: list, val) -> list:
         return [value for value in the_list if value != val]
 

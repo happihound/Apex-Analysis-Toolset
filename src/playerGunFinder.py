@@ -7,6 +7,7 @@ import jellyfish
 import easyocr
 from tqdm import tqdm
 from networkx.algorithms import similarity
+from util.apexUtils import ApexUtils as util
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"
 
@@ -16,6 +17,7 @@ def playerGunFinder(pathToImages, queuedImage):
     loopNumber = 0
     imageCount = 0
     all_Images = []
+    apex_utils = util.ApexUtils()
     imageNumber = []
     foundData = []
     imageNumber.append(0)
@@ -40,9 +42,9 @@ def playerGunFinder(pathToImages, queuedImage):
                 foundData.append(foundGun)
                 imageNumber.append(matchCount)
                 queuedImage.put(image)
-    graph(foundData)
+    apex_utils.graph(foundData)
 
-    save(foundData, imageNumber)
+    apex_utils.save(foundData, imageNumber)
     print('DONE MATCHING')
 
 
@@ -105,6 +107,6 @@ if __name__ == '__main__':
     pathToImages = 'inputData/playerGuns/'
     process1 = multiprocessing.Process(
         target=playerGunFinder, args=(pathToImages, queuedImage,))
-    process2 = multiprocessing.Process(target=display, args=(queuedImage,))
+    process2 = multiprocessing.Process(target=(util.display), args=(queuedImage,))
     process1.start()
     process2.start()

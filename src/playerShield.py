@@ -5,10 +5,7 @@ import glob
 import multiprocessing
 import time
 from statsmodels.nonparametric.smoothers_lowess import lowess
-import apexUtils
-
-apexUtils = apexUtils.apexUtils()
-
+from util.apexUtils import ApexUtils as util
 
 def healthFinder(pathToImages, queuedImage):
     matchCount = 0
@@ -123,6 +120,6 @@ if __name__ == "__main__":
     pathToImages = 'inputData/playerShield/'
     end = multiprocessing.Value("i", False)
     process1 = multiprocessing.Process(target=healthFinder, args=(pathToImages, queuedImage, end))
-    process2 = multiprocessing.Process(target=apexUtils.display, args=(queuedImage, end, 'Health'))
+    process2 = multiprocessing.Process(target=(util.display), args=(queuedImage, end, 'Health'))
     process1.start()
     process2.start()

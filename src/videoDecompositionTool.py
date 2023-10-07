@@ -4,26 +4,26 @@ import os
 print('Starting Video Decomposition Tool')
 # grab only keyframes to ensure frame quality and use GPU acceleration
 fileName = ''
-for file in glob.glob("videos/" + '/*.mp4'):
+for file in glob.glob("video/" + '/*.mp4'):
     fileName = os.path.basename(file)
-stream = ffmpeg.input("videos/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
+stream = ffmpeg.input("video/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
 # output path for all the various parts of the frames
-outputKillFeed = 'input/killFeed/'
-outputMiniMap = 'input/MiniMap/'
-outputPlayerDamage = 'input/PlayerDamage/'
-outputPlayerEvo = 'input/PlayerEvo/'
-outputPlayerGuns = 'input/PlayerGuns/'
-outputPlayerHealth = 'input/PlayerHealth/'
-outputPlayerKills = 'input/PlayerKills/'
-outputKPlayerShield = 'input/PlayerShield/'
-outputPlayerTac = 'input/PlayerTac/'
-outputPlayerUlt = 'input/PlayerUlt/'
-outputTeammate1Health = 'input/Teammate1Health/'
-outputTeammate1Shield = 'input/Teammate1Shield/'
-outputTeammate2Health = 'input/Teammate2Health/'
-outputTeammate2Shield = 'input/Teammate2Shield/'
-outputWholeImage = 'input/WholeImage/'
-outputZoneTimer = 'input/ZoneTimer/'
+outputKillFeed = 'src/internal/input/killFeed/'
+outputMiniMap = 'src/internal/input/MiniMap/'
+outputPlayerDamage = 'src/internal/input/PlayerDamage/'
+outputPlayerEvo = 'src/internal/input/PlayerEvo/'
+outputPlayerGuns = 'src/internal/input/PlayerGuns/'
+outputPlayerHealth = 'src/internal/input/PlayerHealth/'
+outputPlayerKills = 'src/internal/input/PlayerKills/'
+outputKPlayerShield = 'src/internal/input/PlayerShield/'
+outputPlayerTac = 'src/internal/input/PlayerTac/'
+outputPlayerUlt = 'src/internal/input/PlayerUlt/'
+outputTeammate1Health = 'src/internal/input/Teammate1Health/'
+outputTeammate1Shield = 'src/internal/input/Teammate1Shield/'
+outputTeammate2Health = 'src/internal/input/Teammate2Health/'
+outputTeammate2Shield = 'src/internal/input/Teammate2Shield/'
+outputWholeImage = 'src/internal/input/WholeImage/'
+outputZoneTimer = 'src/internal/input/ZoneTimer/'
 # run the cropping procedure on all parts simultaneously
 
 

@@ -6,15 +6,15 @@ import multiprocessing
 import easyocr
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from tqdm import tqdm
-import apexUtils
+from util.apexUtils import ApexUtils as util
 # Similar to evo tracker
-apexUtils = apexUtils.apexUtils()
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"
 
 
 def killTracker(pathToImages, queuedImage, end):
     matchCount = 0
+    apex_utils = util.ApexUtils()
     loopNumber = 0
     imageCount = 0
     data = []
@@ -60,9 +60,9 @@ def killTracker(pathToImages, queuedImage, end):
     data.append(data[-1])
     data = filterValues(data)
     print('found ' + str(matchCount) + ' total matches')
-    apexUtils.save(data=data, time=time, name='killData')
+    apex_utils.save(data=data, time=time, name='killData')
     end.value = 1
-    apexUtils.graph(xAxis=time, yAxis=data, yAxisLabel="data", smoothingWindow=0.00001, total=True)
+    apex_utils.graph(xAxis=time, yAxis=data, yAxisLabel="data", smoothingWindow=0.00001, total=True)
 
 
 def imageBinarizer(image):
@@ -112,7 +112,7 @@ def main():
     pathToImages = 'inputData/playerKills/'
     end = multiprocessing.Value("i", False)
     process1 = multiprocessing.Process(target=killTracker, args=(pathToImages, queuedImage, end))
-    process2 = multiprocessing.Process(target=apexUtils.display, args=(queuedImage, end, 'Kill Tracker'))
+    process2 = multiprocessing.Process(target=(util.display), args=(queuedImage, end, 'Kill Tracker'))
     process1.start()
     process2.start()
 

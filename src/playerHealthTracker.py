@@ -5,6 +5,7 @@ import glob
 import multiprocessing
 import time
 from tqdm import tqdm
+from util.apexUtils import ApexUtils as util
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
 
