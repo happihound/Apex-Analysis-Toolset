@@ -49,9 +49,10 @@ class TacTracker:
                 if 'sec' in text:
                     text = text.replace('s', '').replace('e', '').replace(
                         'c', '').replace('S', '').replace('E', '').replace('C', '')
-                    if text == '':
+                    clean_text = ''.join(ch for ch in text if ch.isdigit())
+                    if clean_text == '':
                         continue
-                    text = int(text)
+                    text = int(clean_text)
                     if text >= 45:
                         continue
                     self.match_count += 1

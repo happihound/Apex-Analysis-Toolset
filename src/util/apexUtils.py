@@ -16,10 +16,11 @@ class ApexUtils:
 
     def __init__(self):
         self._reader = None
-        self._mdodel = None
+        self._model = None
 
     @property
     def super_res_model(self):
+        return
         """Lazy loading of OpenCV's DNN super resolution model"""
         if self._model is None:
             self._model = cv2.dnn_superres.DnnSuperResImpl_create()
@@ -31,11 +32,11 @@ class ApexUtils:
     def reader(self):
         """Lazy loading of easyocr.Reader"""
         if self._reader is None:
-            self._reader = easyocr.Reader(['en'])
+            self._reader = easyocr.Reader(['en'], gpu=True)
         return self._reader
 
     def extract_numbers_from_image(self, image):
-        image = self.super_res_model.upsample(image)
+        # image = self.super_res_model.upsample(image)
         result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
         return result_OCR
 
@@ -76,7 +77,7 @@ class ApexUtils:
             cv2.waitKey(1)
 
     def extract_text_from_image(self, image):
-        image = self.super_res_model.upsample(image)
+        # image = self.super_res_model.upsample(image)
         result_OCR = self.reader.readtext(image, paragraph=False)
         return result_OCR
 

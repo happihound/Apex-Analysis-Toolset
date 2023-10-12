@@ -147,7 +147,7 @@ class Coordinator:
 
 
 if __name__ == '__main__':
-    tracker = Coordinator('all', True)
-    tracker.runTrackers()
+    tracker = Coordinator('all', False)
+    # tracker.runTrackers()
     util.ApexUtils().combineAllCSVs()
     util.ApexUtils().visualize()
