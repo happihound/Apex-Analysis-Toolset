@@ -59,9 +59,9 @@ class UltTracker:
                     self.match_count += 1
                     self.results.append(text)
                     self.result_image_number.append(self.frame_number)
-        else:
-            self.results.append(self.results[-1])
-            self.result_image_number.append(self.frame_number)
+                    return
+        self.results.append(self.results[-1])
+        self.result_image_number.append(self.frame_number)
 
     def filter_values(self, values):
         new_values = [values[0]]

@@ -10,9 +10,13 @@ class VideoDecompositionTool:
 
         # grab only keyframes to ensure frame quality and use GPU acceleration
         fileName = ''
-        for file in glob.glob("video/" + '/*.mp4'):
+        # for file in glob.glob("video/" + '/*.mp4'):
+        for file in glob.glob("video/" + '/*.mkv'):
             fileName = os.path.basename(file)
-        stream = ffmpeg.input("video/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
+
+        # add the hqdn3d filter to remove noise from the video
+        stream = ffmpeg.input("video/"+fileName, vsync=0, hwaccel='cuda')
+
         # output path for all the various parts of the frames
         basepath = util.get_path_to_images()
         outputKillFeed = basepath + "/killFeed/"
@@ -73,17 +77,11 @@ class VideoDecompositionTool:
         PlayerEvo = ffmpeg.output(ffmpeg.crop(stream, 347, 965, 35, 19), outputPlayerEvo + 'PlayerEvo%04d.png')
         ffmpeg.run_async(PlayerEvo)
 
-        PlayerDamage = ffmpeg.output(ffmpeg.crop(stream, 1785, 74, 45, 16), outputPlayerDamage + 'PlayerDamage%04d.png')
-        ffmpeg.run_async(PlayerDamage)
-
         miniMap = ffmpeg.output(ffmpeg.crop(stream, 49, 37, 241, 181), outputMiniMap + 'miniMap%04d.png')
         ffmpeg.run_async(miniMap)
 
         PlayerDamage = ffmpeg.output(ffmpeg.crop(stream, 1785, 74, 45, 14), outputPlayerDamage + 'PlayerDamage%04d.png')
         ffmpeg.run_async(PlayerDamage)
-
-        PlayerEvo = ffmpeg.output(ffmpeg.crop(stream, 194, 957, 216, 31), outputPlayerEvo + 'PlayerEvo%04d.png')
-        ffmpeg.run_async(PlayerEvo)
 
         PlayerGuns = ffmpeg.output(ffmpeg.crop(stream, 1509, 1040, 337, 24), outputPlayerGuns + 'PlayerGuns%04d.png')
         ffmpeg.run_async(PlayerGuns)

@@ -61,7 +61,6 @@ class ZoneTimerTracker:
                             if minute[0] == '0':
                                 minute = minute[1]
                         except Exception as e:
-                            print('IndexError'+str(e))
                             continue
                         second = clean_text[1]
                         # print('\n')
@@ -76,7 +75,6 @@ class ZoneTimerTracker:
                         self.results.append(text)
                         self.result_image_number.append(self.frame_number)
                     except Exception as e:
-                        print('ValueError'+str(e))
                         continue
         else:
             self.results.append(self.results[-1])
@@ -100,12 +98,12 @@ class ZoneTimerTracker:
         return new_values
 
     def graph_filter_and_save(self, frame_number, results) -> None:
-        plt.plot(x, y)
-        plt.xlabel("Time")
-        plt.ylabel("Time Till Zone Close")
-        plt.xlim([0, len(frame_number)])
-        plt.show()
-        plt.pause(99999)
+        # plt.plot(x, y)
+        # plt.xlabel("Time")
+        # plt.ylabel("Time Till Zone Close")
+        # plt.xlim([0, len(frame_number)])
+        # plt.show()
+        # plt.pause(99999)
         self.apex_utils.save(results, frame_number, ["Frame", "Zone Timer"], 'Zone Timer')
 
     def main(self) -> None:
