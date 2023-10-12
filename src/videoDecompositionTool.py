@@ -70,59 +70,29 @@ class VideoDecompositionTool:
         for file in glob.glob(frames + '/*.png'):
             os.remove(file)
         # run the cropping procedure on all parts simultaneously
+        filter_chains = {
+            "miniMap": "crop=241:181:49:37,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerDamage": "crop=45:14:1785:74,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerGuns": "crop=337:24:1509:1040,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerHealth": "crop=244:12:176:1025,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerKills": "crop=45:14:1635:74,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerShield": "crop=234:8:176:1017,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerTac": "crop=70:29:582:1043,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerUlt": "crop=45:19:938:1046,hqdn3d,select=eq(pict_type\,I)",
+            "Teammate1Health": "crop=160:8:139:932,hqdn3d,select=eq(pict_type\,I)",
+            "Teammate1Shield": "crop=160:7:139:926,hqdn3d,select=eq(pict_type\,I)",
+            "Teammate2Health": "crop=160:8:139:882,hqdn3d,select=eq(pict_type\,I)",
+            "Teammate2Shield": "crop=164:8:139:876,hqdn3d,select=eq(pict_type\,I)",
+            "ZoneTimer": "crop=240:65:50:219,hqdn3d,select=eq(pict_type\,I)",
+            "killFeed": "crop=433:100:1387:155,hqdn3d,select=eq(pict_type\,I)",
+            "PlayerEvo": "crop=35:19:347:965,hqdn3d,select=eq(pict_type\,I)"
+        }
+        for output_name, filter_chain in filter_chains.items():
+            output_path = os.path.join(basepath, output_name, f"{output_name}%04d.png")
+            ffmpeg.run_async(ffmpeg.output(stream, output_path, vf=filter_chain))
 
-        killFeed = ffmpeg.output(ffmpeg.crop(stream, 1387, 155, 433, 100), outputKillFeed + 'killFeed%04d.png')
-        ffmpeg.run_async(killFeed)
-
-        PlayerEvo = ffmpeg.output(ffmpeg.crop(stream, 347, 965, 35, 19), outputPlayerEvo + 'PlayerEvo%04d.png')
-        ffmpeg.run_async(PlayerEvo)
-
-        miniMap = ffmpeg.output(ffmpeg.crop(stream, 49, 37, 241, 181), outputMiniMap + 'miniMap%04d.png')
-        ffmpeg.run_async(miniMap)
-
-        PlayerDamage = ffmpeg.output(ffmpeg.crop(stream, 1785, 74, 45, 14), outputPlayerDamage + 'PlayerDamage%04d.png')
-        ffmpeg.run_async(PlayerDamage)
-
-        PlayerGuns = ffmpeg.output(ffmpeg.crop(stream, 1509, 1040, 337, 24), outputPlayerGuns + 'PlayerGuns%04d.png')
-        ffmpeg.run_async(PlayerGuns)
-
-        PlayerHealth = ffmpeg.output(ffmpeg.crop(stream, 176, 1025, 244, 12),
-                                     outputPlayerHealth + 'PlayerHealth%04d.png')
-        ffmpeg.run_async(PlayerHealth)
-
-        PlayerKills = ffmpeg.output(ffmpeg.crop(stream, 1635, 74, 45, 14), outputPlayerKills + 'PlayerKills%04d.png')
-        ffmpeg.run_async(PlayerKills)
-
-        PlayerShield = ffmpeg.output(ffmpeg.crop(stream, 176, 1017, 234, 8),
-                                     outputKPlayerShield + 'PlayerShield%04d.png')
-        ffmpeg.run_async(PlayerShield)
-
-        PlayerTac = ffmpeg.output(ffmpeg.crop(stream, 582, 1043, 70, 29), outputPlayerTac + 'PlayerTac%04d.png')
-        ffmpeg.run_async(PlayerTac)
-
-        PlayerUlt = ffmpeg.output(ffmpeg.crop(stream, 938, 1046, 45, 19), outputPlayerUlt + 'PlayerUlt%04d.png')
-        ffmpeg.run_async(PlayerUlt)
-
-        Teammate1Health = ffmpeg.output(ffmpeg.crop(stream, 139, 932, 160, 8),
-                                        outputTeammate1Health + 'Teammate1Health%04d.png')
-        ffmpeg.run_async(Teammate1Health)
-
-        Teammate1Shield = ffmpeg.output(ffmpeg.crop(stream, 139, 926, 160, 7),
-                                        outputTeammate1Shield + 'Teammate1Shield%04d.png')
-        ffmpeg.run_async(Teammate1Shield)
-
-        Teammate2Health = ffmpeg.output(ffmpeg.crop(stream, 139, 882, 160, 8),
-                                        outputTeammate2Health + 'Teammate2Health%04d.png')
-        ffmpeg.run_async(Teammate2Health)
-
-        Teammate2Shield = ffmpeg.output(ffmpeg.crop(stream, 139, 876, 164, 8),
-                                        outputTeammate2Shield + 'Teammate2Shield%04d.png')
-        ffmpeg.run_async(Teammate2Shield)
-
-        ZoneTimer = ffmpeg.output(ffmpeg.crop(stream, 50, 219, 240, 65), outputZoneTimer + 'ZoneTimer%04d.png')
-        ffmpeg.run_async(ZoneTimer)
-
-        frames = ffmpeg.output(stream, frames + 'frame%04d.png')
+        filter_chain_frames = "hqdn3d,select=eq(pict_type\,I)"
+        frames = ffmpeg.output(stream, frames + 'frame%04d.png', vf=filter_chain_frames)
         ffmpeg.run_async(frames)
 
         print('Video Decomposition Tool Finished')
