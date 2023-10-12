@@ -38,9 +38,9 @@ class ShieldTracker:
                     self.result_image_number.append(self.frame_number)
                     self.queued_image.put(image)
                 else:
+                    self.queued_image.put(image)
                     self.results.append(self.results[-1])
                     self.result_image_number.append(self.frame_number)
-                    self.queued_image.put(image)
 
         end.value = 1
         self.results = self.filter_values(self.results)
@@ -110,16 +110,6 @@ class ShieldTracker:
                 new_values.append(values[i])
         new_values.append(values[-1])
         return new_values
-
-    def display_graph(self) -> None:
-        # every 1 x value is 0.5 seconds
-        x = [val * 1.26 for val in x]
-        plt.plot(x, y)
-        plt.xlabel("Time (seconds)")
-        # put down a marker at every 1 minute
-        plt.xticks(np.arange(0, x[-1], 60))
-        plt.ylabel("Shield")
-        plt.show()
 
     def save_results(self) -> None:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
