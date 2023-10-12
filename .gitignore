@@ -17,6 +17,7 @@ src/internal/input/*/*.png
 video/*.mp4
 *.csv
 .eggs/
+outputData/*/*.png
 lib/
 lib64/
 parts/

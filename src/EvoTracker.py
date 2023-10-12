@@ -1,4 +1,3 @@
-import time
 import cv2
 import matplotlib.pyplot as plt
 import glob
@@ -7,81 +6,92 @@ import easyocr
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
 import numpy as np
+import os
 
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"
 
+EVO_UPPER_LIMIT = 750  # max value for evo shield
+EVO_LOWER_LIMIT = 0  # min value for evo shield
 
-class evoTracker:
+'''
+This class is responsible for tracking the evo shield of the player,
+it uses OCR to extract the ammount of damage until the next level.
+It uses the following from the ApexUtils class:
+    - reader
+    - display
+    - save
+    - load_files_from_directory
+    - extract_frame_number
+    - get_path_to_images
+    - extract_numbers_from_image
 
-    __slots__ = ['end', 'queued_image', 'loop_number', 'match_count',
+The result of this class is saved in a csv file with the following headers:
+    - Frame
+    - Evo
+This describes the frame number and the evo level up amount on that frame.
+'''
+
+
+class EvoTracker:
+    __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
                  'results', 'result_image_number', 'reader', 'path_to_images', 'apex_utils']
 
     def __init__(self):
-        self.end = 0
         self.queued_image = None
-        self.loop_number = 0
+        self.frame_number = 0
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.reader = None
-        self.apex_utils = util.ApexUtils()
-        self.path_to_images = 'input/playerEvo'
+        self.apex_utils = util()
+        self.path_to_images = util().get_path_to_images() + "/playerEvo"
+
+    def process_file(self, file, pbar):
+        image = cv2.imread(file)
+        # Extract the frame number from the filename
+        self.frame_number = self.apex_utils.extract_frame_number(file)
+        result_OCR = self.apex_utils.extract_numbers_from_image(image)
+        if self.process_result(result_OCR, pbar):
+            self.queued_image.put(image)
 
     def track_evo(self, queued_image, end):
-        self.reader = easyocr.Reader(['en'])
-        self.end = end
         self.queued_image = queued_image
-        files = glob.glob(self.path_to_images + '/*.png')
+        files = self.apex_utils.load_files_from_directory(self.path_to_images)
         with tqdm(files) as pbar:
             for file in pbar:
-                image = cv2.imread(file)
-                self.loop_number += 1
-                result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
-                if self.process_result(result_OCR, pbar):
-                    self.queued_image.put(image)
-        self.filter_Values(self.results)
+                self.process_file(file, pbar)
+
+        self.filter_values()
         print(f'found {self.match_count} total matches')
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Evo"], name='Evo')
-        end.value = True
+        end.value = 1
 
     def process_result(self, result_OCR, pbar):
-        for bbox, text, prob in result_OCR:
+        for _, text, prob in result_OCR:
             if text == '':
                 continue
             evo_found = int(text)
             if prob > 0.93 and self.is_valid_evo(evo_found):
                 self.match_count += 1
                 self.results.append(evo_found)
-                self.result_image_number.append(self.loop_number)
-                try:
-                    pbar.set_description(desc=str(self.match_count), refresh=True)
-                except:
-                    pass
+                self.result_image_number.append(self.frame_number)
+                pbar.set_description(desc=str(self.match_count), refresh=True)
                 return True
+            else:
+                self.results.append(self.results[-1])
+                self.result_image_number.append(self.frame_number)
         return False
 
-    def is_valid_evo(self, evo_found):
-        if (evo_found > 750):
-            return False
-        if (evo_found < 0):
-            return False
-        if (evo_found == 0):
-            return False
-        return True
+    @staticmethod
+    def is_valid_evo(evo_found):
+        return EVO_LOWER_LIMIT < evo_found <= EVO_UPPER_LIMIT
 
-    def filter_Values(self, values):
-        # Make a copy of the list to avoid changing the original
-        newValues = values.copy()
-        # Loop through the list, skipping the first and last values
-        for i in range(1, len(values) - 1):
-            # If the next value is the same as the previous value, set the current value to that value
-            if values[i - 1] == values[i + 1]:
-                newValues[i] = values[i - 1]
-            self.match_count = len(newValues)
-        # Return the new list
-        self.results = newValues
+    def filter_values(self):
+        new_values = [self.results[i-1] if self.results[i-1] == self.results[i+1] else value
+                      for i, value in enumerate(self.results[1:-1])]
+        self.results = [self.results[0]] + new_values + [self.results[-1]]
+        self.match_count = len(self.results)
 
     def main(self):
         print('Starting evo tracker')
@@ -93,5 +103,5 @@ class evoTracker:
 
 
 if __name__ == '__main__':
-    evoTracker = evoTracker()
-    evoTracker.main()
+    tracker = EvoTracker()
+    tracker.main()

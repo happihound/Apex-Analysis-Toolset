@@ -7,7 +7,7 @@ from util.apexUtils import ApexUtils as util
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
 
-class HealthTracker:
+class ShieldTracker:
 
     __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
                  'results', 'result_image_number', 'path_to_images', 'apex_utils', 'path']
@@ -22,7 +22,7 @@ class HealthTracker:
         self.path = path
         self.path_to_images = util().get_path_to_images() + path
 
-    def track_health(self, queued_image, end) -> None:
+    def track_shield(self, queued_image, end) -> None:
         self.queued_image = queued_image
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
 
@@ -30,7 +30,7 @@ class HealthTracker:
             for file in pbar:
                 self.frame_number = self.apex_utils.extract_frame_number(file)
                 image = cv2.imread(file)
-                result = self.parse_hp(image)
+                result = self.parse_shield(image)
                 self.queued_image.put(image)
                 if result != -1:
                     self.match_count += 1
@@ -48,55 +48,55 @@ class HealthTracker:
         # self.display_graph()
 
     @staticmethod
-    def round_hp(health: float) -> int:
-        if health > 99:
-            health = 100
-        if health < 3:
-            health = 0
-        return health
+    def round_shield(shield: float) -> int:
+        if shield > 120:
+            shield = 125
+        if shield < 5:
+            shield = 0
+        return shield
 
-    def parse_hp(self, image: np.ndarray) -> int:
+    def parse_shield(self, image: np.ndarray) -> int:
         scale_factor = 5
-        lower_red = np.array([0, 0, 220])
-        upper_red = np.array([180, 45, 255])
+        width = int(image.shape[1] * scale_factor)
+        height = int(image.shape[0] * scale_factor)
+        lower_bound = np.array([0, 0, 220])
+        upper_bound = np.array([220, 255, 255])
+        dim = (width, height)
 
-        # Resize the image for better accuracy.
-        resized_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_LINEAR)
+        # Resize the image
+        resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
-        # Convert to HSV for better color segmentation.
-        hsv = cv2.cvtColor(resized_image, cv2.COLOR_BGR2HSV)
+        # Color segmentation
+        hsv = cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, lower_bound, upper_bound)
+        segmented = cv2.bitwise_and(resized, resized, mask=mask)
 
-        # Create a mask to segment the health bar.
-        mask = cv2.inRange(hsv, lower_red, upper_red)
+        # Convert to grayscale and apply thresholding
+        gray = cv2.cvtColor(segmented, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.blur(gray, (25, 50))
+        blurred = cv2.medianBlur(blurred, 151)
+        _, thresholded = cv2.threshold(blurred, 20, 255, cv2.THRESH_BINARY)
+        self.queued_image.put(thresholded)
 
-        # Find contours in the mask.
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Find contours
+        contours, _ = cv2.findContours(thresholded, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         if not contours:
-            return -1  # No contours found.
+            return -1  # No shield detected
 
-        # Get the largest contour which should be the health bar.
-        main_contour = max(contours, key=cv2.contourArea)
+        # Extract the largest contour (assuming it's the shield)
+        contour = max(contours, key=cv2.contourArea)
 
-        if cv2.contourArea(main_contour) <= 600:
-            return -1  # Health bar contour is too small.
+        # Filter small contours, which are probably noise
+        if cv2.contourArea(contour) <= 600:
+            return -1
 
-        # Extract bounding box of the main contour to get its width.
-        x, y, w, h = cv2.boundingRect(main_contour)
+        # Get enclosing circle and calculate shield width
+        _, radius = cv2.minEnclosingCircle(contour)
+        shield_width = radius * 2
+        shield_value = self.round_shield((shield_width / width) * 125)
 
-        # Calculate health percentage based on width.
-        health_percentage = self.round_hp((w / resized_image.shape[1]) * 100)
-
-        # Check for downed player by using different color thresholds.
-        lower_downed = np.array([60, 200, 190])
-        upper_downed = np.array([160, 255, 215])
-        mask_downed = cv2.inRange(hsv, lower_downed, upper_downed)
-
-        # If the mask has significant white regions, it means the player is downed.
-        if np.sum(mask_downed) > 200 * 255:  # Threshold can be adjusted based on observation.
-            return 1
-
-        return int(health_percentage)
+        return int(shield_value)
 
     def filter_values(self, values):
         new_values = [values[0]]
@@ -118,22 +118,22 @@ class HealthTracker:
         plt.xlabel("Time (seconds)")
         # put down a marker at every 1 minute
         plt.xticks(np.arange(0, x[-1], 60))
-        plt.ylabel("health")
+        plt.ylabel("Shield")
         plt.show()
 
     def save_results(self) -> None:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
-                             headers=["Frame", "Health"], name=self.path[1:])
+                             headers=["Frame", "Shield"], name=self.path[1:])
 
     def main(self) -> None:
-        print('Starting player health tracker')
+        print('Starting player shield tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
         self.apex_utils.display(queued_image, end, 'Health Tracker')
-        self.track_health(queued_image, end)
-        print('Finished player health tracker')
+        self.track_shield(queued_image, end)
+        print('Finished player shield tracker')
 
 
 if __name__ == "__main__":
-    health_tracker = HealthTracker('/playerHealth')
+    health_tracker = ShieldTracker('/playerShield')
     health_tracker.main()
