@@ -12,13 +12,14 @@ import multiprocessing
 
 class miniMapPlotter:
     __slots__ = ['map', 'mapPath', 'gameMap', 'images', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queuedImage', 'end']
+                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queuedImage', 'end', 'apex_util']
 
     def __init__(self):
         # Set up the live image preview window
         plt.bbox_inches = "tight"
         plt.switch_backend('TKAgg')
         plt.axis('off')
+        self.apex_util = util()
         # Pick the map for the program to use
         self.map = ''
         self.ratio = ''
@@ -28,7 +29,7 @@ class miniMapPlotter:
         self.images = []
         self.results = []
         self.resultImageNumber = []
-        self.mapFolderPath = 'input/minimap/'
+        self.mapFolderPath = self.apex_util.get_path_to_images()+'minimap/'
         self.outputMapPath = 'outputData/'
         # Minimum number of matching key points between two image
         self.MIN_MATCH_COUNT = 13
@@ -54,14 +55,14 @@ class miniMapPlotter:
 
     def setMap(self, map):
         self.map = map
-        self.mapPath = 'internal/packedKeypoints/'+self.ratio+'/'+self.map+self.ratio+'KeyPoints.npy'
+        self.mapPath = 'src/internal/packedKeypoints/'+self.ratio+'/'+self.map+self.ratio+'KeyPoints.npy'
 
     def setRatio(self, ratio):
         self.ratio = ratio
         self.setMap(self.map)
 
     def main(self):
-        self.gameMap = cv2.imread('internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
+        self.gameMap = cv2.imread('src/internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
         process1 = multiprocessing.Process(target=self.miniMapPlotter, args=(self.queuedImage, self.end,))
         process2 = multiprocessing.Process(target=self.display, args=(self.queuedImage, self.end,))
         process1.start()
@@ -215,9 +216,9 @@ class miniMapPlotter:
 
 if __name__ == '__main__':
     print('Starting MiniMap Matching')
-    #args = sys.argv
+    # args = sys.argv
     # Debug arguments for testing
-    args = ['miniMapPlotting.py', '-mapName=OLY', '-ratio=4by3']
+    args = ['miniMapPlotting.py', '-mapName=BM', '-ratio=4by3']
     # Check if the user has entered the correct number of arguments
     if len(args) == 1:
         print("Command format:")
