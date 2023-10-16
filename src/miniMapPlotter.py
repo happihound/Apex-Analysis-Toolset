@@ -1,8 +1,8 @@
+# cython: profile=True
 import csv
 import sys
 import numpy as np
-import cv2 as cv
-import cv2 as cv2
+import cv2
 import matplotlib.pyplot as plt
 import glob
 import cProfile
@@ -16,8 +16,6 @@ class miniMapPlotter:
 
     def __init__(self):
         # Set up the live image preview window
-        plt.bbox_inches = "tight"
-        plt.switch_backend('TKAgg')
         plt.axis('off')
         self.apex_util = util()
         # Pick the map for the program to use
@@ -81,8 +79,8 @@ class miniMapPlotter:
                           for x, y, _size, _angle, _response, _octave, _class_id in list(self.tempKeyPoints)]
 
     def miniMapPlotter(self, queuedImage, end):
-        self.featureMappingAlgMiniMap = cv.SIFT_create()
-        self.featureMatcher = cv.BFMatcher_create(normType=cv.NORM_L2SQR)
+        self.featureMappingAlgMiniMap = cv2.SIFT_create()
+        self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
         print('Starting matching')
         # Initialize the variables
         try:
@@ -97,7 +95,7 @@ class miniMapPlotter:
             print(flush=True)
             print("Computing Image " + file.split('\\')[1], end='\n\t')
             self.numberOfImagesRun = self.numberOfImagesRun + 1
-            image = cv.imread(file, cv2.IMREAD_COLOR)
+            image = cv2.imread(file, cv2.IMREAD_COLOR)
             self.editedImage = self.gameMap.copy()
             ceterPoint = self.matchImage(image)
             if ceterPoint is not False:
@@ -118,7 +116,7 @@ class miniMapPlotter:
             line.append(line[0])
         drawnLine = [np.array(line, np.int32).reshape((-1, 1, 2))]
         print('Updating Display Image', end='\n\t')
-        modifiedImage = cv.polylines(self.editedImage, drawnLine, False, self.color, self.lineThickness, cv.LINE_AA)
+        modifiedImage = cv2.polylines(self.editedImage, drawnLine, False, self.color, self.lineThickness, cv2.LINE_AA)
         queuedImage.put(modifiedImage)
         self.editedImage = modifiedImage
 
@@ -154,21 +152,21 @@ class miniMapPlotter:
         # Find homography
         src_pts = np.float32([kp1[m.queryIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
         dst_pts = np.float32([self.keyPoints[m.trainIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
-        M, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+        M, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         h, w, _ = image.shape
         # create a rectangle around the matching area
         pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
-        rectanglePoints = cv.perspectiveTransform(pts, M)
+        rectanglePoints = cv2.perspectiveTransform(pts, M)
         if M is None:
             return False
         # Perform a homographic perspective transform on the rectangle of points in order to map the sub image to the main image
-        ceterPoint = cv.perspectiveTransform(np.float32((115, 86)).reshape(-1, 1, 2), M)
+        ceterPoint = cv2.perspectiveTransform(np.float32((115, 86)).reshape(-1, 1, 2), M)
         return ceterPoint, rectanglePoints
 
     def validateMatch(self, rectanglePoints):
         print('Validating Match', end='\n\t')
         # Calculate the size of the newly transformed polygon
-        polySize = np.int_(cv.contourArea(rectanglePoints))
+        polySize = np.int_(cv2.contourArea(rectanglePoints))
         # Use a rolling average to avoid hard coding size restrictions
         rolling_avg = np.int_((np.sum(self.polysizeArray[-5:-1])/4))
         if polySize != 0:
@@ -196,8 +194,8 @@ class miniMapPlotter:
         print('Saving Image', end='\n\t')
         finalOutputBase = self.gameMap.copy()
         # Draw all the center points with lines connecting them on the main image
-        finalOutputBase = cv.polylines(finalOutputBase, [np.array(line, np.int32).reshape(
-            (-1, 1, 2))], False, self.color, self.lineThickness, cv.LINE_AA)
+        finalOutputBase = cv2.polylines(finalOutputBase, [np.array(line, np.int32).reshape(
+            (-1, 1, 2))], False, self.color, self.lineThickness, cv2.LINE_AA)
         finalOutputBase = cv2.cvtColor(finalOutputBase, cv2.COLOR_BGR2RGB)
         plt.imsave(self.outputMapPath + ' FINAL' + '.jpg', finalOutputBase)
         print('Image save complete', end='\n\t')
@@ -215,6 +213,22 @@ class miniMapPlotter:
             cv2.waitKey(1)
 
 
+def profile():
+    args = ['miniMapPlotting.py', '-mapName=BM', '-ratio=4by3']
+    miniMapMatching = miniMapPlotter()
+    for arg in args:
+        if arg.split('=')[0] == '-mapName':
+            miniMapMatching.setMap(arg.split('=')[1])
+        elif arg.split('=')[0] == '-ratio':
+            miniMapMatching.setRatio(arg.split('=')[1])
+        else:
+            print("Invalid argument: " + arg)
+            exit()
+
+    miniMapMatching.main()
+
+
+exit()
 if __name__ == '__main__':
     print('Starting MiniMap Matching')
     # args = sys.argv
