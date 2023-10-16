@@ -32,7 +32,7 @@ class miniMapPlotter:
         self.mapFolderPath = self.apex_util.get_path_to_images()+'minimap/'
         self.outputMapPath = 'outputData/'
         # Minimum number of matching key points between two image
-        self.MIN_MATCH_COUNT = 13
+        self.MIN_MATCH_COUNT = 11
         # Initialize the feature mapping algorithm and matcher
         self.featureMappingAlgMiniMap = None
         self.featureMatcher = None
@@ -170,12 +170,13 @@ class miniMapPlotter:
         # Calculate the size of the newly transformed polygon
         polySize = np.int_(cv.contourArea(rectanglePoints))
         # Use a rolling average to avoid hard coding size restrictions
-        rolling_avg = int((np.sum(self.polysizeArray[-4:-1])/3))
+        rolling_avg = np.int_((np.sum(self.polysizeArray[-5:-1])/4))
         if polySize != 0:
             self.polysizeArray.append(polySize)
         # Check if the polygon size is within the tolerance of the rolling average
-        if polySize > int(rolling_avg+rolling_avg*self.polyTolerance) or polySize < int(rolling_avg-rolling_avg*self.polyTolerance):
+        if polySize > np.int_(rolling_avg+rolling_avg*self.polyTolerance) or polySize < np.int_(rolling_avg-rolling_avg*self.polyTolerance):
             print('Polygon size out of tolerance - %d/%d' % (polySize, rolling_avg), end='\n\t')
+            self.polysizeArray.pop()
             return False
         else:
             print('Polygon size within tolerance - %d/%d' % (polySize, rolling_avg), end='\n\t')

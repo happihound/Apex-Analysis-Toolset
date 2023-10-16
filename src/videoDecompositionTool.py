@@ -71,7 +71,7 @@ class VideoDecompositionTool:
             os.remove(file)
         # run the cropping procedure on all parts simultaneously
         filter_chains = {
-            "miniMap": "crop=241:181:49:37,hqdn3d,select=eq(pict_type\,I)",
+            "miniMap": "crop=241:181:50:38,hqdn3d,select=eq(pict_type\,I)",
             "PlayerDamage": "crop=45:14:1785:74,hqdn3d,select=eq(pict_type\,I)",
             "PlayerGuns": "crop=337:24:1509:1040,hqdn3d,select=eq(pict_type\,I)",
             "PlayerHealth": "crop=244:12:176:1025,hqdn3d,select=eq(pict_type\,I)",
