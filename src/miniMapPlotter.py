@@ -12,12 +12,12 @@ import multiprocessing
 
 class miniMapPlotter:
     __slots__ = ['map', 'mapPath', 'gameMap', 'images', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queuedImage', 'end', 'apex_util']
+                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queued_image', 'end', 'apex_utils']
 
     def __init__(self):
         # Set up the live image preview window
         plt.axis('off')
-        self.apex_util = util()
+        self.apex_utils = util()
         # Pick the map for the program to use
         self.map = ''
         self.ratio = ''
@@ -27,7 +27,7 @@ class miniMapPlotter:
         self.images = []
         self.results = []
         self.resultImageNumber = []
-        self.mapFolderPath = self.apex_util.get_path_to_images()+'minimap/'
+        self.mapFolderPath = self.apex_utils.get_path_to_images()+'minimap/'
         self.outputMapPath = 'outputData/'
         # Minimum number of matching key points between two image
         self.MIN_MATCH_COUNT = 11
@@ -48,7 +48,7 @@ class miniMapPlotter:
         self.editedImage = []
         self.color = (225, 0, 255)
         self.lineThickness = 3
-        self.queuedImage = multiprocessing.Queue()
+        self.queued_image = multiprocessing.Queue()
         self.end = multiprocessing.Value('i', 0)
 
     def setMap(self, map):
@@ -61,10 +61,8 @@ class miniMapPlotter:
 
     def main(self):
         self.gameMap = cv2.imread('src/internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
-        process1 = multiprocessing.Process(target=self.miniMapPlotter, args=(self.queuedImage, self.end,))
-        process2 = multiprocessing.Process(target=self.display, args=(self.queuedImage, self.end,))
-        process1.start()
-        process2.start()
+        self.apex_utils.display(self.queued_image, self.end, 'Damage Tracker')
+        self.miniMapPlotter(self.queued_image, self.end)
 
     def loadMapKeyPoints(self, keypointPath):
         # Load baked key points
@@ -78,7 +76,7 @@ class miniMapPlotter:
         self.keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
                           for x, y, _size, _angle, _response, _octave, _class_id in list(self.tempKeyPoints)]
 
-    def miniMapPlotter(self, queuedImage, end):
+    def miniMapPlotter(self, queued_image, end):
         self.featureMappingAlgMiniMap = cv2.SIFT_create()
         self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
         print('Starting matching')
@@ -100,7 +98,7 @@ class miniMapPlotter:
             ceterPoint = self.matchImage(image)
             if ceterPoint is not False:
                 line.append(ceterPoint)
-                self.editImage(queuedImage, line)
+                self.editImage(queued_image, line)
                 self.resultImageNumber.append(imageNumber)
                 self.results.append(ceterPoint)
         if len(line) == 0:
@@ -213,22 +211,6 @@ class miniMapPlotter:
             cv2.waitKey(1)
 
 
-def profile():
-    args = ['miniMapPlotting.py', '-mapName=BM', '-ratio=4by3']
-    miniMapMatching = miniMapPlotter()
-    for arg in args:
-        if arg.split('=')[0] == '-mapName':
-            miniMapMatching.setMap(arg.split('=')[1])
-        elif arg.split('=')[0] == '-ratio':
-            miniMapMatching.setRatio(arg.split('=')[1])
-        else:
-            print("Invalid argument: " + arg)
-            exit()
-
-    miniMapMatching.main()
-
-
-exit()
 if __name__ == '__main__':
     print('Starting MiniMap Matching')
     # args = sys.argv
