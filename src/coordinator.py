@@ -137,10 +137,10 @@ class Coordinator:
     def runDamageTracker(self):
         damageTracker.DamageTracker().main()
 
-    def runMiniMapPlotter(self):
+    def runMiniMapPlotter(self, map, ratio):
         print("skipping mini map plotter")
         return
-        # miniMapPlotter.MiniMapPlotter().main()
+        # miniMapPlotter.MiniMapPlotter(map, ratio).main()
 
     def runZoneTimer(self):
         ZoneTimerTracker.ZoneTimerTracker().main()

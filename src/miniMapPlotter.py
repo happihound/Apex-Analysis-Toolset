@@ -8,23 +8,22 @@ import glob
 import cProfile
 from util.apexUtils import ApexUtils as util
 import multiprocessing
+import tqdm
 
 
 class miniMapPlotter:
-    __slots__ = ['map', 'mapPath', 'gameMap', 'images', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'mapKeyPoints', 'ratio', 'tempKeyPoints', 'numberOfImagesRun', 'matchCountForStats', 'descriptors', 'keyPoints', 'polysizeArray', 'polyTolerance', 'matches', 'editedImage', 'color', 'lineThickness', 'dst_line_final', 'queued_image', 'end', 'apex_utils']
+    __slots__ = ['MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher', 'mapKeyPoints', 'mapMatching', 'polysizeArray', 'polyTolerance', 'line_color',
+                 'line_thickness', 'map_name', 'game_image_ratio', 'game_map_image', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'apex_utils']
 
-    def __init__(self):
+    def __init__(self, given_map, ratio):
         # Set up the live image preview window
         plt.axis('off')
         self.apex_utils = util()
         # Pick the map for the program to use
-        self.map = ''
-        self.ratio = ''
-        self.mapPath = ''
-        self.gameMap = ''
+        self.map_name = ''
+        self.game_image_ratio = ''
+        self.game_map_image = ''
         # Initialize the image handling variables
-        self.images = []
         self.results = []
         self.resultImageNumber = []
         self.mapFolderPath = self.apex_utils.get_path_to_images()+'minimap/'
@@ -32,91 +31,83 @@ class miniMapPlotter:
         # Minimum number of matching key points between two image
         self.MIN_MATCH_COUNT = 11
         # Initialize the feature mapping algorithm and matcher
-        self.featureMappingAlgMiniMap = None
-        self.featureMatcher = None
+        self.featureMappingAlgMiniMap = cv2.SIFT_create()
+        self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
         # Initialize the key point arrays
-        self.mapKeyPoints = []
-        self.tempKeyPoints = []
-        self.descriptors = []
-        self.keyPoints = []
+        self.mapMatching = []
         # Initialize the polygon size array
         self.polysizeArray = [650000, 650000, 560000, 340000, 540000, 440000, 600000]
         self.polyTolerance = 0.5
-        self.matches = 0
-        self.numberOfImagesRun = 0
-        self.matchCountForStats = 0
-        self.editedImage = []
-        self.color = (225, 0, 255)
-        self.lineThickness = 3
-        self.queued_image = multiprocessing.Queue()
-        self.end = multiprocessing.Value('i', 0)
+        self.line_color = (225, 0, 255)
+        self.line_thickness = 3
+        self.map_name = given_map
+        self.game_image_ratio = ratio
 
-    def setMap(self, map):
-        self.map = map
-        self.mapPath = 'src/internal/packedKeypoints/'+self.ratio+'/'+self.map+self.ratio+'KeyPoints.npy'
-
-    def setRatio(self, ratio):
-        self.ratio = ratio
-        self.setMap(self.map)
+    def setupMap(self):
+        self.loadMapKeyPoints('src/internal/packedKeypoints/'+self.game_image_ratio+'/' +
+                              self.map_name+self.game_image_ratio+'KeyPoints.npy')
+        self.game_map_image = cv2.imread('src/internal/maps/'+self.game_image_ratio +
+                                         '/map'+self.map_name+self.game_image_ratio+'.jpg')
 
     def main(self):
-        self.gameMap = cv2.imread('src/internal/maps/'+self.ratio+'/map'+self.map+self.ratio+'.jpg')
-        self.apex_utils.display(self.queued_image, self.end, 'Damage Tracker')
-        self.miniMapPlotter(self.queued_image, self.end)
+        if self.map_name == '' or self.game_image_ratio == '':
+            raise Exception('Map or ratio not set')
+        self.setupMap()
+        end = multiprocessing.Value('i', 0)
+        queued_image = multiprocessing.Queue()
+        self.apex_utils.display(queued_image, end, 'Minimap Plotter')
+        self.miniMapPlotter(queued_image, end)
 
     def loadMapKeyPoints(self, keypointPath):
         # Load baked key points
         print('Loading Map Data')
         # Load the packed numpy file
-        self.mapKeyPoints = np.load(keypointPath).astype('float32')
+        mapKeyPoints = np.load(keypointPath).astype('float32')
         # Split the key points into their respective arrays
-        self.tempKeyPoints = self.mapKeyPoints[:, :7]
-        self.descriptors = np.array(self.mapKeyPoints[:, 7:])
+        tempKeyPoints = mapKeyPoints[:, :7]
+        descriptors = np.array(mapKeyPoints[:, 7:])
         # Create a list of key points
-        self.keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
-                          for x, y, _size, _angle, _response, _octave, _class_id in list(self.tempKeyPoints)]
+        keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
+                     for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
+        self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
 
     def miniMapPlotter(self, queued_image, end):
-        self.featureMappingAlgMiniMap = cv2.SIFT_create()
-        self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
         print('Starting matching')
-        # Initialize the variables
-        try:
-            self.loadMapKeyPoints(self.mapPath)
-        except:
-            print('No map data found, make sure to run the mapDataPacker first')
-            sys.exit()
         line = []
         # Loop through the mini map images
-        for imageNumber, file in enumerate(glob.glob(self.mapFolderPath + '/*.png')):
-            # Load the mini map images
-            print(flush=True)
-            print("Computing Image " + file.split('\\')[1], end='\n\t')
-            self.numberOfImagesRun = self.numberOfImagesRun + 1
-            image = cv2.imread(file, cv2.IMREAD_COLOR)
-            self.editedImage = self.gameMap.copy()
-            ceterPoint = self.matchImage(image)
-            if ceterPoint is not False:
-                line.append(ceterPoint)
-                self.editImage(queued_image, line)
-                self.resultImageNumber.append(imageNumber)
-                self.results.append(ceterPoint)
+        files = self.apex_utils.load_files_from_directory(self.path_to_images)
+        with tqdm(files) as pbar:
+            for file in pbar:
+                frame_number = self.apex_utils.extract_frame_number(file)
+                # Load the mini map images
+                print(flush=True)
+                print("Computing Image " + file.split('\\')[1], end='\n\t')
+                image = cv2.imread(file, cv2.IMREAD_COLOR)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                display_image = self.gameMap
+                ceterPoint = self.matchImage(image)
+                if ceterPoint is not False:
+                    line.append(ceterPoint)
+                    display_image = self.editImage(display_image, queued_image, line)
+                    self.resultImageNumber.append(frame_number)
+                    self.results.append(ceterPoint)
         if len(line) == 0:
             print('No matches found, or no images in the folder. Make sure you run the extractMiniMap.py script first')
-            sys.exit()
+            return
 
+        print('Average polygon size: %d' %
+              (np.sum(self.polysizeArray)/len(self.polysizeArray)), end='\n\t')
         self.save(line)
         end.value = 1
-        sys.exit()
 
-    def editImage(self, queuedImage, line):
+    def editImage(self, display_image, queuedImage, line):
         if len(line) == 0:
             line.append(line[0])
         drawnLine = [np.array(line, np.int32).reshape((-1, 1, 2))]
         print('Updating Display Image', end='\n\t')
-        modifiedImage = cv2.polylines(self.editedImage, drawnLine, False, self.color, self.lineThickness, cv2.LINE_AA)
+        modifiedImage = cv2.polylines(display_image, drawnLine, False, self.color, self.lineThickness, cv2.LINE_AA)
         queuedImage.put(modifiedImage)
-        self.editedImage = modifiedImage
+        return modifiedImage
 
     def matchImage(self, image):
         kp1, goodMatches = self.checkIfMatch(image)
@@ -128,7 +119,6 @@ class miniMapPlotter:
 
     def checkIfMatch(self, image):
         # Initialize the variables
-        lastPoint = []
         goodMatches = []
         # compute descriptors and key points on the mini map images
         kp1, des1 = self.featureMappingAlgMiniMap.detectAndCompute(image, None)
@@ -137,7 +127,6 @@ class miniMapPlotter:
         for m, n in matches:
             if m.distance < 0.65*n.distance:
                 goodMatches.append(m)
-        self.matchCountForStats += len(goodMatches)
         if len(goodMatches) >= self.MIN_MATCH_COUNT:
             print('Match found - %d/%d' % (len(goodMatches), self.MIN_MATCH_COUNT), end='\n\t')
             return (kp1, goodMatches)
@@ -154,9 +143,9 @@ class miniMapPlotter:
         h, w, _ = image.shape
         # create a rectangle around the matching area
         pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
-        rectanglePoints = cv2.perspectiveTransform(pts, M)
         if M is None:
             return False
+        rectanglePoints = cv2.perspectiveTransform(pts, M)
         # Perform a homographic perspective transform on the rectangle of points in order to map the sub image to the main image
         ceterPoint = cv2.perspectiveTransform(np.float32((115, 86)).reshape(-1, 1, 2), M)
         return ceterPoint, rectanglePoints
@@ -179,18 +168,15 @@ class miniMapPlotter:
             return True
 
     def save(self, line):
-        print('Saving data')
-        print('Average matches per image: %d' %
-              (self.matchCountForStats/self.numberOfImagesRun), end='\n\t')
-        # Save the data to a csv file
-        with open(self.outputMapPath + 'output.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',')
-            writer.writerow(['Image Number', 'X', 'Y'])
-            for i in range(len(self.results)):
-                writer.writerow([self.resultImageNumber[i], self.results[i][0][0][0], self.results[i][0][0][1]])
+        save_array_data = []
+        save_array_frame = []
+        for i in range(len(self.results)):
+            save_array_data.append((self.results[i][0][0][0], self.results[i][0][0][1]))
+            save_array_frame.append(self.resultImageNumber[i])
+        self.apex_utils.save(save_array_data, save_array_frame, ['Frame', 'Coords'], 'miniMapPlotter')
         print('Data save complete', end='\n\t')
         print('Saving Image', end='\n\t')
-        finalOutputBase = self.gameMap.copy()
+        finalOutputBase = self.gameMap
         # Draw all the center points with lines connecting them on the main image
         finalOutputBase = cv2.polylines(finalOutputBase, [np.array(line, np.int32).reshape(
             (-1, 1, 2))], False, self.color, self.lineThickness, cv2.LINE_AA)
@@ -199,48 +185,7 @@ class miniMapPlotter:
         print('Image save complete', end='\n\t')
         print('Program complete', end='\n\t')
 
-    def display(self, queuedImage, end):
-        print('Displaying', end='\n\t')
-        cv2.namedWindow('mapImage', cv2.WINDOW_NORMAL)
-        cv2.imshow("mapImage", self.gameMap)
-        while end.value == 0:
-            if not queuedImage.empty():
-                imS = cv2.resize(queuedImage.get(), (1333, 1000))
-                cv2.imshow("mapImage", imS)
-                continue
-            cv2.waitKey(1)
-
 
 if __name__ == '__main__':
-    print('Starting MiniMap Matching')
-    # args = sys.argv
-    # Debug arguments for testing
-    args = ['miniMapPlotting.py', '-mapName=BM', '-ratio=4by3']
-    # Check if the user has entered the correct number of arguments
-    if len(args) == 1:
-        print("Command format:")
-        print("\tminiMapPlotting.py -mapName=MAPNAME -ratio=RATIO")
-        print("\t\t-mapName: Name of the map to be used, valid names are:")
-        print("\t\t\t- 'KC'")
-        print("\t\t\t- 'WE'")
-        print("\t\t\t- 'OLY'")
-        print("\t\t\t- 'SP'")
-        print("\t\t\t- 'BM'")
-        print("\t\t -ratio (optional): Aspect ratio of the map, valid ratios are:")
-        print("\t\t\t- '4by3' (default)")
-        print("\t\t\t- '16by9' ")
-        print("\t\t\t- '16by10'")
-    else:
-        args.pop(0)
-        # Create a miniMapPlotter object and set the map name and aspect ratio
-        miniMapMatching = miniMapPlotter()
-        for arg in args:
-            if arg.split('=')[0] == '-mapName':
-                miniMapMatching.setMap(arg.split('=')[1])
-            elif arg.split('=')[0] == '-ratio':
-                miniMapMatching.setRatio(arg.split('=')[1])
-            else:
-                print("Invalid argument: " + arg)
-                exit()
-
+    miniMapMatching = miniMapPlotter('BM', '4by3')
     miniMapMatching.main()
