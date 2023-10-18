@@ -73,7 +73,11 @@ class ApexUtils:
         cv2.imshow(window_name, cv2.imread('src/internal/default.png'))
         while not end.value:
             if not queued_image.empty():
-                cv2.imshow(window_name, queued_image.get())
+                image = queued_image.get()
+                # resize image if it is over 1000 pixels wide or tall
+                if image.shape[0] > 1000 or image.shape[1] > 1000:
+                    image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
+                cv2.imshow(window_name, image)
             cv2.waitKey(1)
 
     def extract_text_from_image(self, image):
@@ -81,7 +85,7 @@ class ApexUtils:
         result_OCR = self.reader.readtext(image, paragraph=False)
         return result_OCR
 
-    @staticmethod
+    @ staticmethod
     def save(data: List[int], frame: List[int], headers: List[str] = None, name: str = 'default', debug: bool = False):
         '''Saves data as a csv file
         data: list of data to be saved
@@ -137,7 +141,7 @@ class ApexUtils:
             print(f"Error: {e}")
             return
 
-    @staticmethod
+    @ staticmethod
     def combineAllCSVs():
         # Path to the folder containing the CSV files
         folder_path = 'outputdata/'
@@ -187,7 +191,7 @@ class ApexUtils:
                 row = [frame_num] + [data.get(header, "null") for header in headers[1:]]
                 writer.writerow(row)
 
-    @staticmethod
+    @ staticmethod
     def wrap_text(text, draw, font, max_width):
         """Wrap text to fit within specified width."""
         lines = []
@@ -199,7 +203,7 @@ class ApexUtils:
             lines.append(line)
         return lines
 
-    @staticmethod
+    @ staticmethod
     def visualize():
         csv_path = 'merged.csv'
         frames_dir = 'src/internal/input/frames'

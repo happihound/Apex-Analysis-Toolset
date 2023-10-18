@@ -8,184 +8,278 @@ import glob
 import cProfile
 from util.apexUtils import ApexUtils as util
 import multiprocessing
-import tqdm
+from tqdm import tqdm
 
 
-class miniMapPlotter:
-    __slots__ = ['MIN_MATCH_COUNT', 'featureMappingAlgMiniMap', 'featureMatcher', 'mapKeyPoints', 'mapMatching', 'polysizeArray', 'polyTolerance', 'line_color',
-                 'line_thickness', 'map_name', 'game_image_ratio', 'game_map_image', 'results', 'resultImageNumber', 'mapFolderPath', 'outputMapPath', 'apex_utils']
+class MiniMapPlotter:
+    """
+    Class to handle mini map image matching against a given game map.
+    """
 
-    def __init__(self, given_map, ratio):
-        # Set up the live image preview window
-        plt.axis('off')
+    __slots__ = ['map_name', 'game_image_ratio', 'game_map_image', 'mapKeyPoints', 'min_match_count',
+                 'poly_tolerance', 'polysizeArray', 'featureMappingAlgMiniMap', 'featureMatcher',
+                 'apex_utils', 'results', 'resultImageNumber', 'start_color', 'end_color']
+
+    def __init__(self, given_map, ratio, min_match_count=11, poly_tolerance=0.5, start_color=(0, 0, 255), end_color=(255, 0, 0)):
+        """
+        Initialize the MiniMapPlotter with the given parameters.
+
+        Parameters:
+        - given_map: Name of the map.
+        - ratio: Image ratio.
+        - min_match_count: Minimum number of matching key points between two images.
+        - poly_tolerance: Tolerance for polygon size validation.
+        """
+        self.start_color = np.array(start_color, dtype=np.float32)
+        self.end_color = np.array(end_color, dtype=np.float32)
         self.apex_utils = util()
-        # Pick the map for the program to use
-        self.map_name = ''
-        self.game_image_ratio = ''
-        self.game_map_image = ''
-        # Initialize the image handling variables
-        self.results = []
-        self.resultImageNumber = []
-        self.mapFolderPath = self.apex_utils.get_path_to_images()+'minimap/'
-        self.outputMapPath = 'outputData/'
-        # Minimum number of matching key points between two image
-        self.MIN_MATCH_COUNT = 11
-        # Initialize the feature mapping algorithm and matcher
-        self.featureMappingAlgMiniMap = cv2.SIFT_create()
-        self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
-        # Initialize the key point arrays
-        self.mapMatching = []
-        # Initialize the polygon size array
-        self.polysizeArray = [650000, 650000, 560000, 340000, 540000, 440000, 600000]
-        self.polyTolerance = 0.5
-        self.line_color = (225, 0, 255)
-        self.line_thickness = 3
         self.map_name = given_map
         self.game_image_ratio = ratio
+        self.game_map_image = None
+        self.mapKeyPoints = None
+        self.min_match_count = min_match_count
+        self.poly_tolerance = poly_tolerance
+        self.polysizeArray = [650000, 650000, 560000, 340000, 540000, 440000, 600000]
+        self.featureMappingAlgMiniMap = cv2.SIFT_create()
+        self.featureMatcher = cv2.BFMatcher_create(normType=cv2.NORM_L2SQR)
+        self.results = []
+        self.resultImageNumber = []
 
-    def setupMap(self):
-        self.loadMapKeyPoints('src/internal/packedKeypoints/'+self.game_image_ratio+'/' +
-                              self.map_name+self.game_image_ratio+'KeyPoints.npy')
+    def get_color(self, fraction):
+        return tuple(np.round(self.start_color + fraction * (self.end_color - self.start_color)).astype(np.int32))
+
+    def setup_map(self):
+        """
+        Set up the map for matching.
+        """
+        self.load_map_key_points('src/internal/packedKeypoints/'+self.game_image_ratio+'/' +
+                                 self.map_name+self.game_image_ratio+'KeyPoints.npy')
         self.game_map_image = cv2.imread('src/internal/maps/'+self.game_image_ratio +
                                          '/map'+self.map_name+self.game_image_ratio+'.jpg')
 
     def main(self):
-        if self.map_name == '' or self.game_image_ratio == '':
-            raise Exception('Map or ratio not set')
-        self.setupMap()
+        """
+        Main execution function for the MiniMapPlotter.
+        """
+        if not self.map_name or not self.game_image_ratio:
+            raise ValueError('Map or ratio not set')
+
         end = multiprocessing.Value('i', 0)
         queued_image = multiprocessing.Queue()
+        self.setup_map()
         self.apex_utils.display(queued_image, end, 'Minimap Plotter')
-        self.miniMapPlotter(queued_image, end)
+        self.process_all_images(queued_image, end)
 
-    def loadMapKeyPoints(self, keypointPath):
-        # Load baked key points
-        print('Loading Map Data')
-        # Load the packed numpy file
-        mapKeyPoints = np.load(keypointPath).astype('float32')
-        # Split the key points into their respective arrays
-        tempKeyPoints = mapKeyPoints[:, :7]
-        descriptors = np.array(mapKeyPoints[:, 7:])
-        # Create a list of key points
-        keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
-                     for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
-        self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
+    def process_all_images(self, queued_image, end):
+        """
+        Process all the mini map images.
 
-    def miniMapPlotter(self, queued_image, end):
+        Parameters:
+        - queued_image: Queue to hold the images for display.
+        - end: Signal to indicate the end of the process.
+        """
         print('Starting matching')
         line = []
+        file_timestamps = []
+        files = self.apex_utils.load_files_from_directory(directory=self.apex_utils.get_path_to_images()+"/miniMap")
+
+        for file in files:
+            timestamp = self.apex_utils.extract_frame_number(file)
+            file_timestamps.append(timestamp)
+
+        min_time, max_time = min(file_timestamps), max(file_timestamps)
         # Loop through the mini map images
-        files = self.apex_utils.load_files_from_directory(self.path_to_images)
         with tqdm(files) as pbar:
-            for file in pbar:
+            for idx, file in enumerate(pbar):
                 frame_number = self.apex_utils.extract_frame_number(file)
                 # Load the mini map images
                 print(flush=True)
                 print("Computing Image " + file.split('\\')[1], end='\n\t')
-                image = cv2.imread(file, cv2.IMREAD_COLOR)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                display_image = self.gameMap
-                ceterPoint = self.matchImage(image)
-                if ceterPoint is not False:
-                    line.append(ceterPoint)
-                    display_image = self.editImage(display_image, queued_image, line)
+                display_image = self.game_map_image
+                center_point = self.process_image(file)
+                if center_point is not False:
+                    line.append(center_point)
+                    fraction = (file_timestamps[idx] - min_time) / (max_time - min_time)
+                    color = self.get_color(fraction)
+                    display_image = self.edit_image(display_image, queued_image, line, color)
                     self.resultImageNumber.append(frame_number)
-                    self.results.append(ceterPoint)
+                    self.results.append((center_point, color))
         if len(line) == 0:
             print('No matches found, or no images in the folder. Make sure you run the extractMiniMap.py script first')
             return
-
-        print('Average polygon size: %d' %
-              (np.sum(self.polysizeArray)/len(self.polysizeArray)), end='\n\t')
         self.save(line)
-        end.value = 1
 
-    def editImage(self, display_image, queuedImage, line):
-        if len(line) == 0:
+    def edit_image(self, display_image, queued_image, line, color):
+        """
+        Edit the provided display image with the provided line points.
+
+        Parameters:
+        - display_image: Image to be edited.
+        - queued_image: Queue to hold the images for display.
+        - line: Line points to be drawn on the display image.
+
+        Returns:
+        - Modified image with the line drawn.
+        """
+        if not line:
             line.append(line[0])
-        drawnLine = [np.array(line, np.int32).reshape((-1, 1, 2))]
-        print('Updating Display Image', end='\n\t')
-        modifiedImage = cv2.polylines(display_image, drawnLine, False, self.color, self.lineThickness, cv2.LINE_AA)
-        queuedImage.put(modifiedImage)
-        return modifiedImage
-
-    def matchImage(self, image):
-        kp1, goodMatches = self.checkIfMatch(image)
-        if kp1 is not False:
-            ceterPoint, rectanglePoints = self.computeHomography(image, kp1, goodMatches)
-            if self.validateMatch(rectanglePoints):
-                return np.array(ceterPoint, np.int32)
-        return False
-
-    def checkIfMatch(self, image):
-        # Initialize the variables
-        goodMatches = []
-        # compute descriptors and key points on the mini map images
-        kp1, des1 = self.featureMappingAlgMiniMap.detectAndCompute(image, None)
-        matches = self.featureMatcher.knnMatch(des1, self.descriptors, k=2)
-        # Use the ratio test to find good matches
-        for m, n in matches:
-            if m.distance < 0.65*n.distance:
-                goodMatches.append(m)
-        if len(goodMatches) >= self.MIN_MATCH_COUNT:
-            print('Match found - %d/%d' % (len(goodMatches), self.MIN_MATCH_COUNT), end='\n\t')
-            return (kp1, goodMatches)
-        else:
-            print('Not enough matches found - %d/%d' % (len(goodMatches), self.MIN_MATCH_COUNT), end='\n\t')
-            return (False, False)
-
-    def computeHomography(self, image, kp1, goodMatches):
-        print('Computing Homography', end='\n\t')
-        # Find homography
-        src_pts = np.float32([kp1[m.queryIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
-        dst_pts = np.float32([self.keyPoints[m.trainIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
-        M, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        h, w, _ = image.shape
-        # create a rectangle around the matching area
-        pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
-        if M is None:
-            return False
-        rectanglePoints = cv2.perspectiveTransform(pts, M)
-        # Perform a homographic perspective transform on the rectangle of points in order to map the sub image to the main image
-        ceterPoint = cv2.perspectiveTransform(np.float32((115, 86)).reshape(-1, 1, 2), M)
-        return ceterPoint, rectanglePoints
-
-    def validateMatch(self, rectanglePoints):
-        print('Validating Match', end='\n\t')
-        # Calculate the size of the newly transformed polygon
-        polySize = np.int_(cv2.contourArea(rectanglePoints))
-        # Use a rolling average to avoid hard coding size restrictions
-        rolling_avg = np.int_((np.sum(self.polysizeArray[-5:-1])/4))
-        if polySize != 0:
-            self.polysizeArray.append(polySize)
-        # Check if the polygon size is within the tolerance of the rolling average
-        if polySize > np.int_(rolling_avg+rolling_avg*self.polyTolerance) or polySize < np.int_(rolling_avg-rolling_avg*self.polyTolerance):
-            print('Polygon size out of tolerance - %d/%d' % (polySize, rolling_avg), end='\n\t')
-            self.polysizeArray.pop()
-            return False
-        else:
-            print('Polygon size within tolerance - %d/%d' % (polySize, rolling_avg), end='\n\t')
-            return True
+        drawn_line = [np.array(line, np.int32).reshape((-1, 1, 2))]
+        # Explicitly convert the color tuple to integers
+        color = tuple(map(int, color))
+        modified_image = cv2.polylines(display_image, drawn_line, False, color, 3, cv2.LINE_AA)
+        queued_image.put(modified_image)
+        return modified_image
 
     def save(self, line):
+        """
+        Save the results and the final output image.
+
+        Parameters:
+        - line: Line points to be drawn on the final image.
+        """
         save_array_data = []
         save_array_frame = []
         for i in range(len(self.results)):
-            save_array_data.append((self.results[i][0][0][0], self.results[i][0][0][1]))
+            save_array_data.append((self.results[i][0][0], self.results[i][0][1]))
             save_array_frame.append(self.resultImageNumber[i])
         self.apex_utils.save(save_array_data, save_array_frame, ['Frame', 'Coords'], 'miniMapPlotter')
-        print('Data save complete', end='\n\t')
-        print('Saving Image', end='\n\t')
-        finalOutputBase = self.gameMap
-        # Draw all the center points with lines connecting them on the main image
-        finalOutputBase = cv2.polylines(finalOutputBase, [np.array(line, np.int32).reshape(
-            (-1, 1, 2))], False, self.color, self.lineThickness, cv2.LINE_AA)
-        finalOutputBase = cv2.cvtColor(finalOutputBase, cv2.COLOR_BGR2RGB)
-        plt.imsave(self.outputMapPath + ' FINAL' + '.jpg', finalOutputBase)
-        print('Image save complete', end='\n\t')
-        print('Program complete', end='\n\t')
+
+        final_output_base = self.game_map_image
+        for idx, point in enumerate(line[:-1]):
+            color = tuple(map(int, self.results[idx][1]))
+            print(f"Point: {point}, Next Point: {line[idx+1]}, Color: {color}")  # Debugging statement
+            cv2.line(final_output_base, point, line[idx+1], color, 3, cv2.LINE_AA)
+        final_output_base = cv2.cvtColor(final_output_base, cv2.COLOR_BGR2RGB)
+        plt.imsave('outputData/FINAL.jpg', final_output_base)
+
+    def load_map_key_points(self, keypoint_path):
+        """
+        Load baked key points from the given path.
+
+        Parameters:
+        - keypoint_path: Path to the key points file.
+        """
+        try:
+            mapKeyPoints = np.load(keypoint_path).astype('float32')
+            tempKeyPoints = mapKeyPoints[:, :7]
+            descriptors = np.array(mapKeyPoints[:, 7:])
+            keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
+                         for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
+            self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
+        except Exception as e:
+            print(f"Error loading key points: {e}")
+            raise
+
+    def check_if_match(self, image):
+        """
+        Check if the provided image matches with the stored map key points.
+
+        Parameters:
+        - image: Image to be matched.
+
+        Returns:
+        - kp1, good_matches if a match is found, otherwise (False, False).
+        """
+        try:
+            descriptors = self.mapKeyPoints['descriptors']
+            kp1, des1 = self.featureMappingAlgMiniMap.detectAndCompute(image, None)
+            matches = self.featureMatcher.knnMatch(des1, descriptors, k=2)
+
+            good_matches = [m for m, n in matches if m.distance < 0.65*n.distance]
+
+            if len(good_matches) >= self.min_match_count:
+                return (kp1, good_matches)
+            else:
+                return (False, False)
+        except Exception as e:
+            print(f"Error matching image: {e}")
+            return (False, False)
+
+    def compute_homography(self, image, kp1, good_matches):
+        """
+        Compute the homography for the provided image and matches.
+
+        Parameters:
+        - image: Image for which homography is to be computed.
+        - kp1: Key points from the image.
+        - good_matches: Good matches between the image and map key points.
+
+        Returns:
+        - ceterPoint, rectanglePoints if successful, otherwise (False, False).
+        """
+        try:
+            src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32([self.mapKeyPoints['keyPoints']
+                                  [m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+            M, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+
+            if M is None:
+                return (False, False)
+
+            h, w, _ = image.shape
+            pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
+            rectangle_points = cv2.perspectiveTransform(pts, M)
+            center_point = cv2.perspectiveTransform(np.float32((115, 86)).reshape(-1, 1, 2), M)
+            center_point = (int(center_point[0][0][0]), int(center_point[0][0][1]))
+            return center_point, rectangle_points
+        except Exception as e:
+            print(f"Error computing homography: {e}")
+            return (False, False)
+
+    def validate_match(self, rectangle_points):
+        """
+        Validate if the provided rectangle_points form a valid match.
+
+        Parameters:
+        - rectangle_points: Points forming the rectangle.
+
+        Returns:
+        - True if the match is valid, otherwise False.
+        """
+        try:
+            poly_size = np.int_(cv2.contourArea(rectangle_points))
+            rolling_avg = np.int_((np.sum(self.polysizeArray[-5:-1])/4))
+
+            if poly_size != 0:
+                self.polysizeArray.append(poly_size)
+
+            if poly_size > np.int_(rolling_avg + rolling_avg * self.poly_tolerance) or poly_size < np.int_(rolling_avg - rolling_avg * self.poly_tolerance):
+                self.polysizeArray.pop()
+                return False
+            else:
+                return True
+        except Exception as e:
+            print(f"Error validating match: {e}")
+            return False
+
+    def process_image(self, image_path):
+        """
+        Process the provided image against the game map.
+
+        Parameters:
+        - image_path: Path to the image to be processed.
+
+        Returns:
+        - center_point if the match is valid, otherwise False.
+        """
+        try:
+            image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            kp1, good_matches = self.check_if_match(image)
+
+            if kp1 is not False:
+                center_point, rectangle_points = self.compute_homography(image, kp1, good_matches)
+                if self.validate_match(rectangle_points):
+                    return center_point
+                return False
+            else:
+                return False
+        except Exception as e:
+            print(f"Error processing image: {e}")
+            return False
 
 
 if __name__ == '__main__':
-    miniMapMatching = miniMapPlotter('BM', '4by3')
+    miniMapMatching = MiniMapPlotter('BM', '4by3')
     miniMapMatching.main()
