@@ -1,9 +1,6 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 import multiprocessing
-import easyocr
-from statsmodels.nonparametric.smoothers_lowess import lowess
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
 

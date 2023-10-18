@@ -1,12 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
-import glob
 import multiprocessing
-import easyocr
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
-import numpy as np
-import os
+
 
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"

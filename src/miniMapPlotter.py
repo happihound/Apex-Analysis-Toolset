@@ -1,11 +1,7 @@
 # cython: profile=True
-import csv
-import sys
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import glob
-import cProfile
 from util.apexUtils import ApexUtils as util
 import multiprocessing
 from tqdm import tqdm

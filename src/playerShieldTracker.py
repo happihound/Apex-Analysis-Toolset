@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
-from statsmodels.nonparametric.smoothers_lowess import lowess
 
 
 class ShieldTracker:

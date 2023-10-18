@@ -3,9 +3,8 @@ import multiprocessing
 from tqdm import tqdm
 import jellyfish
 from util.apexUtils import ApexUtils as util
-import numpy as np
 import cv2
-import easyocr
+
 
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"

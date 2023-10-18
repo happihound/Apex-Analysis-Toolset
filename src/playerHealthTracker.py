@@ -1,10 +1,8 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
-from statsmodels.nonparametric.smoothers_lowess import lowess
 
 
 class HealthTracker:
@@ -110,16 +108,6 @@ class HealthTracker:
                 new_values.append(values[i])
         new_values.append(values[-1])
         return new_values
-
-    def display_graph(self) -> None:
-        # every 1 x value is 0.5 seconds
-        x = [val * 1.26 for val in x]
-        plt.plot(x, y)
-        plt.xlabel("Time (seconds)")
-        # put down a marker at every 1 minute
-        plt.xticks(np.arange(0, x[-1], 60))
-        plt.ylabel("health")
-        plt.show()
 
     def save_results(self) -> None:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
