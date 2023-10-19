@@ -79,7 +79,7 @@ class UltTracker:
         return new_values
 
     def graph_filter_and_save(self, frame_number, results) -> None:
-        self.apex_utils.save(results, frame_number, ["Frame", "Utl Cooldown"], 'Player Utl Cooldown')
+        self.apex_utils.save(results, frame_number, ["Frame", "Utl Cooldown"], 'Player Ult Cooldown')
         return
         plt.plot(x, y)
         plt.xlabel("Time")

@@ -10,11 +10,13 @@ Welcome to the comprehensive guide for the 'Apex Legends Analysis Tool' project.
   - [Table of Contents](#table-of-contents)
     - [Introduction ](#introduction-)
     - [Video Decomposition Tool ](#video-decomposition-tool-)
-    - [Damage Tracker ](#damage-tracker-)
     - [Coordinator ](#coordinator-)
-    - [Evolution Shield Tracker ](#evolution-shield-tracker-)
+    - [Damage Tracker ](#damage-tracker-)
+  - [](#)
+    - [Evo Shield Tracker ](#evo-shield-tracker-)
     - [Game Map Image Manager ](#game-map-image-manager-)
     - [Mini Map Plotter ](#mini-map-plotter-)
+  - [](#-1)
     - [Player Gun Tracker ](#player-gun-tracker-)
     - [Player Health Tracker ](#player-health-tracker-)
     - [Player Kill Tracker ](#player-kill-tracker-)
@@ -51,22 +53,6 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 
 ---
 
-### Damage Tracker <a name="damage-tracker"></a>
-
-**File**: damageTracker.py
-
-**Overview**: At the heart of the project lies the `damageTracker.py` file, an adept tool fashioned to chronicle the damage a player inflicts in a game. With the power of Optical Recognition (OCR), it extracts and logs damage values from in-game images. A series of filters ensure the accuracy of these values, discarding any anomalies that could skew the analysis. The outcomes are meticulously logged, pairing frame numbers with cumulative damage, thereby painting a vivid picture of the player's combat prowess.
-
-**Key Features**:
-
-- **OCR Integration**: Harnesses Optical Character Recognition to diligently extract damage values from in-game images.
-- **Dynamic Filtering**: Employs dynamic filters to ensure the accuracy and reliability of the extracted damage values.
-- **Data Storage**: Archives the extracted damage values, aligning them with their corresponding frame numbers for a chronological analysis of the player's performance.
-
-**Visual Element**:
-- **[Space for Damage Tracking Samples]**: An array of in-game images showcasing the damage tracking process, from extraction to logging.
-
----
 
 ### Coordinator <a name="coordinator"></a>
 
@@ -80,12 +66,28 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Diverse Trackers**: Encompasses a plethora of trackers, spanning player stats, game environment, and other gameplay nuances.
 - **Data Consolidation and Visualization**: As the final act, the coordinator seamlessly amalgamates the extracted data from various modules, laying the groundwork for insightful visualizations.
 
-**Visual Element**:
-- **[Space for Coordinator Functionality Illustrations]**: Diagrams or flowcharts underscoring the coordination and flow of data extraction and processing.
+**Flowchart**:
+![Coordinator Flowchart](githubImages/Coordinator_Flowchart.jpg)
 
 ---
 
-### Evolution Shield Tracker <a name="evo-tracker"></a>
+### Damage Tracker <a name="damage-tracker"></a>
+
+**File**: damageTracker.py
+
+**Overview**: At the heart of the project lies the `damageTracker.py` file, an adept tool fashioned to chronicle the damage a player inflicts in a game. With the power of Optical Recognition (OCR), it extracts and logs damage values from in-game images. A series of filters ensure the accuracy of these values, discarding any anomalies that could skew the analysis. The outcomes are meticulously logged, pairing frame numbers with cumulative damage, thereby painting a vivid picture of the player's combat prowess.
+
+**Key Features**:
+
+- **OCR Integration**: Harnesses Optical Character Recognition to diligently extract damage values from in-game images.
+- **Dynamic Filtering**: Employs dynamic filters to ensure the accuracy and reliability of the extracted damage values.
+- **Data Storage**: Archives the extracted damage values, aligning them with their corresponding frame numbers for a chronological analysis of the player's performance.
+
+**Damage Graph**:
+![Damage Tracker Graph](githubImages/Damage_Tracker_Graph.jpg)
+---
+
+### Evo Shield Tracker <a name="evo-tracker"></a>
 
 **File**: evoTracker.py
 
@@ -97,8 +99,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **OCR Integration**: Leverages Optical Character Recognition to accurately capture shield values.
 - **Data Validation and Storage**: Employs rigorous validation checks, ensuring only genuine shield values make the cut. The outcomes are systematically archived for future analysis.
 
-**Visual Element**:
-- **[Space for Evolution Shield Tracking Samples]**: A curated selection of images depicting the shield evolution tracking, reflecting the player's defensive journey.
+**Evo Shield Graph**:
+![Evolution Shield Tracker Graph](githubImages/Evo_Tracker_Graph.jpg)
 
 ---
 
@@ -113,9 +115,6 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Aspect Ratio Management**: The module seamlessly handles image ratios, offering methods to both retrieve and parse aspect ratios.
 - **Image Retrieval and Copy**: Facilitates easy retrieval of stored images and allows for the creation of identical copies for further processing.
 - **Image Comparison**: Implements an equality check method to compare two game map images based on image content and aspect ratio.
-
-**Visual Element**:
-- **[Space for Game Map Image]**: A snapshot of the game map image managed by this module, showcasing its quality and clarity.
 
 ---
 
@@ -132,9 +131,11 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Image Validation**: Post matching, the module verifies the matched area using contour areas and a rolling average, ensuring authenticity.
 - **Homography Computation**: Through the computation of perspective transformation, the module extracts the mini-map's exact position on the game map.
 
-**Visual Element**:
-- **[Space for Matched Mini Map on Game Map]**: A visual representation of the mini-map matched against the game map, highlighting its precise location.
+**Video example**
+![Mini Map Plotter Video](githubImages/Mini_Map_Plotter_Video.gif)
 
+**Picture example**
+![Mini Map Plotter Picture](githubImages/Mini_Map_Plotter_Picture.jpg)
 ---
 
 ### Player Gun Tracker <a name="player-gun-tracker"></a>
@@ -150,8 +151,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Filtering Mechanism**: Implements a filtering process on detected gun names, emphasizing neighboring values and frequency for enhanced precision.
 - **Multiprocessing for Efficiency**: Adopts parallelism to expedite the gun tracking process, ensuring swift and efficient results.
 
-**Visual Element**:
-- **[Space for Gun Detection Samples]**: A montage of in-game screenshots showcasing the gun detection process, highlighting the accuracy and precision of the OCR-based system.
+**Most Frequent Guns Graph**:
+![Player Gun Tracker Graph](githubImages/Player_Gun_Tracker_Graph.jpg)
 
 ---
 
@@ -168,8 +169,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Data Smoothing**: Employs the `statsmodels` library to smooth the extracted health data, providing a more consistent data set.
 - **Result Storage**: Methodically saves the results, including frame numbers and health percentages, for future analysis.
 
-**Visual Element**:
-- **[Space for Health Tracking Samples]**: A sequence of in-game images highlighting the process of health tracking, showcasing the detection of health bars and the downed state.
+**Health Graph**:
+![Player Health Tracker Graph](githubImages/Player_Health_Tracker_Graph.jpg)
 
 ---
 
@@ -185,8 +186,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Dynamic Image Cropping**: Features a dynamic cropping method to isolate the section of the image containing the kill count, ensuring accurate OCR readings.
 - **Data Filtering**: Incorporates a mechanism to filter extracted kill counts, refining the data for maximum accuracy.
 
-**Visual Element**:
-- **[Space for Kill Detection Samples]**: A series of game snapshots detailing the kill detection process, emphasizing the OCR's accuracy in capturing kill counts.
+**Kills Graph**:
+![Player Kill Tracker Graph](githubImages/Player_Kill_Tracker_Graph.jpg)
 
 ---
 
@@ -202,8 +203,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Shield Quantification**: Represents the shield as a numeric value based on the detected shield width.
 - **Data Filtering and Saving**: Incorporates mechanisms to filter the extracted shield values and save them systematically for subsequent analysis.
 
-**Visual Element**:
-- **[Space for Shield Tracking Samples]**: A collection of in-game images elucidating the shield tracking process, showcasing the detection and quantification of shields.
+**Shield Graph**:
+![Player Shield Tracker Graph](githubImages/Player_Shield_Tracker_Graph.jpg)
 
 ---
 
@@ -220,8 +221,6 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Data Smoothing**: Utilizes LOWESS (Locally Weighted Scatterplot Smoothing) to ensure consistency in the extracted tactical data.
 - **Result Visualization and Storage**: While visualization is currently commented out, the module provides mechanisms to save the tactical ability tracking results.
 
-**Visual Element**:
-- **[Space for Tactical Ability Tracking Samples]**: An assortment of game images detailing the tactical ability tracking, highlighting the extraction and quantification of abilities.
 
 ---
 
@@ -237,8 +236,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Result Processing**: Processes the OCR results, purging noise and capturing only the pertinent ultimate ability information.
 - **Data Refinement**: Uses filtering methods to polish the acquired data, ensuring precision and reliability.
 
-**Visual Element**:
-- **[Space for Ultimate Ability Tracking Samples]**: A compilation of in-game images illustrating the ultimate ability tracking process, underscoring the detection and quantification of abilities.
+**Ult timer graph**:
+![Player Ultimate Tracker Graph](githubImages/Player_Ult_Tracker_Graph.jpg)
 
 ---
 
@@ -254,11 +253,7 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Game Zone Extraction**: Houses a specialized function to extract the game zone from the map, with special handling techniques for certain aspect ratios.
 - **Target Detection**: Although the implementation details are truncated, it suggests the ability to detect targets on the game map.
 
-**Visual Element**:
-- **[Space for Processed User Map Image Samples]**: A display of processed game map images, emphasizing the cropping, feature extraction, and other transformations carried out by this class.
-
 ---
-
 
 ### Zone Timer Tracker <a name="zone-timer-tracker"></a>
 
@@ -272,8 +267,8 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **Result Processing**: Processes the OCR results, eliminating noise and capturing only the pertinent zone timer information.
 - **Data Refinement**: Employs filtering methods to polish the acquired data, ensuring reliability and accuracy.
 
-**Visual Element**:
-- **[Space for Zone Timer Tracking Samples]**: A compilation of in-game images illustrating the zone timer tracking process, emphasizing the detection and quantification of timing details.
+**Zone timer graph**:
+![Zone Timer Tracker Graph](githubImages/Zone_Timer_Tracker_Graph.jpg)
 
 ---
 
@@ -290,9 +285,6 @@ The 'Apex Legends Analysis Tool' is an intricate ensemble of modules meticulousl
 - **File Operations**: Provides methods for file loading, CSV merging, reading, and saving, ensuring efficient data management.
 - **Image Display and Processing**: Houses methods to display images and apply super-resolution, enhancing the visual clarity.
 - **Text Wrapping**: Contains a text wrapping function to fit text within specified bounds, useful for annotations and image overlays.
-
-**Visual Element**:
-- **[Space for Utility Function Samples]**: A sequence of images or diagrams illustrating some of the utility functions in action, such as OCR extraction, super-resolution results, and file merging.
 
 ---
 

@@ -96,6 +96,13 @@ class ApexUtils:
         lowess_frac = 0.002  # size of data (%) for estimation =~ smoothing window
         lowess_it = 0
         lowess_delta = 2
+        # try to cast floats to ints
+        try:
+            data = [int(i) for i in data]
+            frame = [int(i) for i in frame]
+        except Exception as e:
+            print(f"Error: {e}")
+            pass
         if type(data[0]) == int:
             data = lowess(data, frame, is_sorted=False, frac=lowess_frac,
                           it=lowess_it, delta=lowess_delta, return_sorted=False)
@@ -184,7 +191,7 @@ class ApexUtils:
         print(f"Headers: {headers}")
 
         # Write the master dictionary to a new CSV file
-        with open('merged.csv', 'w', newline='') as file:
+        with open('outputData/merged.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(headers)
             for frame_num, data in sorted(master_dict.items()):
@@ -205,7 +212,7 @@ class ApexUtils:
 
     @ staticmethod
     def visualize():
-        csv_path = 'merged.csv'
+        csv_path = 'outputData/merged.csv'
         frames_dir = 'src/internal/input/frames'
         output_dir = 'outputData/frames'
 

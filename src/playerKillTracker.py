@@ -1,9 +1,10 @@
+import csv
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"
@@ -43,6 +44,7 @@ class KillTracker:
 
         print(f'found {self.match_count} total matches')
         end.value = 1
+        self.results = KillTracker().filter_values(self.results)
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Kills"], name='Player Kills')
 
@@ -109,19 +111,61 @@ class KillTracker:
         return final_cropped
 
     @staticmethod
-    def filter_values(values):
-        loop_number = 8
-        new_values = values.copy()
-        for i in values:
-            loop_number += 1
-            if loop_number > len(values) - 4:
-                break
-            new_values[loop_number] = KillTracker.most_frequent(values[loop_number-8:loop_number+4])
-        return new_values
-
-    @staticmethod
     def most_frequent(lst):
         return max(set(lst), key=lst.count)
+
+    @staticmethod
+    def replace_lesser_values(values):
+        i = 0
+        last_valid_value = None  # To store the last valid value before encountering x
+
+        while i < len(values):
+            x = values[i]
+            x_count = 0
+            j = i
+
+            # Count the occurrences of x
+            while j < len(values) and values[j] == x:
+                x_count += 1
+                j += 1
+
+            # Check for the next number that's >= x
+            lesser_values = []  # To store values lesser than x
+            while j < len(values) and values[j] < x:
+                lesser_values.append(values[j])
+                j += 1
+
+            if len(lesser_values) > x_count:
+                # If we have more lesser values than occurrences of x
+                for k in range(i, i + x_count):
+                    values[k] = last_valid_value  # Replace with last valid value
+                i = i + x_count
+            else:
+                # Save x as the last valid value and continue to the next different number
+                last_valid_value = x
+                i = j
+
+        return values
+
+    @staticmethod
+    def ensure_increasing(values):
+        last_highest = 0
+        return_values = []
+        for value in values:
+            if value < last_highest:
+                return_values.append(last_highest)
+            else:
+                return_values.append(value)
+                last_highest = value
+        return return_values
+
+    @staticmethod
+    def filter_values(values):
+        values = KillTracker().replace_lesser_values(values)
+        print(f"replaced lesser values: {values}")
+        values = KillTracker().ensure_increasing(values)
+        print(f"ensured increasing: {values}")
+        return values
 
     def main(self):
         print('Starting kill tracker')
