@@ -23,7 +23,7 @@ class ApexUtils:
         """Lazy loading of OpenCV's DNN super resolution model"""
         if self._model is None:
             self._model = cv2.dnn_superres.DnnSuperResImpl_create()
-            self._model.readModel('src/internal/super_resolution/EDSR_x4.pb')
+            self._model.readModel('src/server/internal/super_resolution/EDSR_x4.pb')
             self._model.setModel("edsr", 4)
         return self._model
 
@@ -54,7 +54,7 @@ class ApexUtils:
 
     @staticmethod
     def get_path_to_images() -> str:
-        return 'src/internal/input/'
+        return 'src/server/internal/input/'
 
     def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
         '''Displays images from a queue
@@ -69,7 +69,7 @@ class ApexUtils:
 
     def run_display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
         cv2.namedWindow(window_name)
-        cv2.imshow(window_name, cv2.imread('src/internal/default.png'))
+        cv2.imshow(window_name, cv2.imread('src/server/internal/default.png'))
         while not end.value:
             if not queued_image.empty():
                 image = queued_image.get()
@@ -212,7 +212,7 @@ class ApexUtils:
     @ staticmethod
     def visualize():
         csv_path = 'outputData/merged.csv'
-        frames_dir = 'src/internal/input/frames'
+        frames_dir = 'src/server/internal/input/frames'
         output_dir = 'outputData/frames'
 
         # Ensure the output directory exists

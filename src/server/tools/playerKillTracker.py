@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
-from src.util.apexUtils import ApexUtils as util
+from util.apexUtils import ApexUtils as util
 
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title}}</title>
+</head>
+<body>
+
+<h1>{{ title }}</h1>
+
+<form action="/video-decomposition" method="post">
+    <!-- Simple Options -->
+    <h3>Simple Options</h3>
+    <p>{{ simple_options }}</p>
+
+    <!-- Detailed Options -->
+    <h3>Detailed Options</h3>
+    <p>{{ detailed_options }}</p>
+
+    <!-- Checkboxes -->
+    <input type="checkbox" id="killFeed" name="killFeed" value="True">
+    <label for="killFeed">Kill Feed</label><br>
+
+    <input type="checkbox" id="PlayerEvo" name="PlayerEvo" value="True">
+    <label for="PlayerEvo">Player Evo</label><br>
+
+    <input type="checkbox" id="PlayerDamage" name="PlayerDamage" value="True">
+    <label for="PlayerDamage">Player Damage</label><br>
+
+    <input type="checkbox" id="miniMap" name="miniMap" value="True">
+    <label for="miniMap">Mini Map</label><br>
+
+    <input type="checkbox" id="PlayerGuns" name="PlayerGuns" value="True">
+    <label for="PlayerGuns">Player Guns</label><br>
+
+    <input type="checkbox" id="PlayerHealth" name="PlayerHealth" value="True">
+    <label for="PlayerHealth">Player Health</label><br>
+
+    <input type="checkbox" id="PlayerKills" name="PlayerKills" value="True">
+    <label for="PlayerKills">Player Kills</label><br>
+
+    <input type="checkbox" id="PlayerShield" name="PlayerShield" value="True">
+    <label for="PlayerShield">Player Shield</label><br>
+
+    <input type="checkbox" id="PlayerTac" name="PlayerTac" value="True">
+    <label for="PlayerTac">Player Tac</label><br>
+
+    <input type="checkbox" id="PlayerUlt" name="PlayerUlt" value="True">
+    <label for="PlayerUlt">Player Ult</label><br>
+
+    <input type="checkbox" id="Teammate1Health" name="Teammate1Health" value="True">
+    <label for="Teammate1Health">Teammate 1 Health</label><br>
+
+    <input type="checkbox" id="Teammate1Shield" name="Teammate1Shield" value="True">
+    <label for="Teammate1Shield">Teammate 1 Shield</label><br>
+
+    <input type="checkbox" id="Teammate2Health" name="Teammate2Health" value="True">
+    <label for="Teammate2Health">Teammate 2 Health</label><br>
+
+    <input type="checkbox" id="Teammate2Shield" name="Teammate2Shield" value="True">
+    <label for="Teammate2Shield">Teammate 2 Shield</label><br>
+
+    <input type="checkbox" id="ZoneTimer" name="ZoneTimer" value="True">
+    <label for="ZoneTimer">Zone Timer</label><br>
+
+    <input type="checkbox" id="frames" name="frames" value="True">
+    <label for="frames">Frames</label><br>
+
+    <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

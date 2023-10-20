@@ -5,9 +5,10 @@ from util.apexUtils import ApexUtils as util
 
 
 class VideoDecompositionTool:
-    def decompose_video(self):
+    def decompose_video(self, to_extract=None):
         print('Starting Video Decomposition Tool')
-
+        if to_extract is 'debug':
+            return 'debug called'
         # grab only keyframes to ensure frame quality and use GPU acceleration
         fileName = ''
         # for file in glob.glob("video/" + '/*.mp4'):
@@ -35,40 +36,44 @@ class VideoDecompositionTool:
         outputTeammate2Shield = basepath + "/teammate2Shield/"
         outputZoneTimer = basepath + "/zoneTimer/"
         frames = basepath + "/frames/"
+        # map args to the output paths
+        output_paths = {
+            "miniMap": outputMiniMap,
+            "PlayerDamage": outputPlayerDamage,
+            "PlayerGuns": outputPlayerGuns,
+            "PlayerHealth": outputPlayerHealth,
+            "PlayerKills": outputPlayerKills,
+            "PlayerShield": outputKPlayerShield,
+            "PlayerTac": outputPlayerTac,
+            "PlayerUlt": outputPlayerUlt,
+            "Teammate1Health": outputTeammate1Health,
+            "Teammate1Shield": outputTeammate1Shield,
+            "Teammate2Health": outputTeammate2Health,
+            "Teammate2Shield": outputTeammate2Shield,
+            "ZoneTimer": outputZoneTimer,
+            "killFeed": outputKillFeed,
+            "PlayerEvo": outputPlayerEvo,
+            "frames": frames
+        }
 
-        # delete all files in the output folders
-        for file in glob.glob(outputKillFeed + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerEvo + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerDamage + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputMiniMap + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerGuns + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerHealth + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerKills + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputKPlayerShield + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerTac + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputPlayerUlt + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputTeammate1Health + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputTeammate1Shield + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputTeammate2Health + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputTeammate2Shield + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(outputZoneTimer + '/*.png'):
-            os.remove(file)
-        for file in glob.glob(frames + '/*.png'):
-            os.remove(file)
+        # create all the output folders if they don't exist
+        for output_name, output_path in output_paths.items():
+            if not os.path.exists(output_path):
+                os.makedirs(output_path)
+
+        # only delete files in the selected output folders
+        if to_extract is not None:
+            for output_name, output_path in output_paths.items():
+                if output_name not in to_extract:
+                    continue
+                for file in glob.glob(output_path + '/*.png'):
+                    os.remove(file)
+        else:
+            # delete all
+            for output_name, output_path in output_paths.items():
+                for file in glob.glob(output_path + '/*.png'):
+                    os.remove(file)
+
        # run the cropping procedure on all parts simultaneously
         filter_chains = {
             "miniMap": "crop=237:179:52:38,hqdn3d,select=eq(pict_type\,I)",
@@ -85,17 +90,16 @@ class VideoDecompositionTool:
             "Teammate2Shield": "crop=164:8:139:876,hqdn3d,select=eq(pict_type\,I)",
             "ZoneTimer": "crop=240:65:50:219,hqdn3d,select=eq(pict_type\,I)",
             "killFeed": "crop=433:100:1387:155,hqdn3d,select=eq(pict_type\,I)",
-            "PlayerEvo": "crop=35:19:347:965,hqdn3d,select=eq(pict_type\,I)"
+            "PlayerEvo": "crop=35:19:347:965,hqdn3d,select=eq(pict_type\,I)",
+            "frames": "hqdn3d,select=eq(pict_type\,I)"
         }
         for output_name, filter_chain in filter_chains.items():
+            # only extract the frames on the selected output folders
+            if to_extract is not None:
+                if output_name not in to_extract:
+                    continue
             output_path = os.path.join(basepath, output_name, f"{output_name}%04d.png")
             ffmpeg.run_async(ffmpeg.output(stream, output_path, vf=filter_chain))
-
-        filter_chain_frames = "hqdn3d,select=eq(pict_type\,I)"
-        frames = ffmpeg.output(stream, frames + 'frame%04d.png', vf=filter_chain_frames)
-        ffmpeg.run_async(frames)
-
-        print('Video Decomposition Tool Finished')
 
 
 if __name__ == '__main__':

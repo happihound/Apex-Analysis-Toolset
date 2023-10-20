@@ -14,7 +14,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-src/internal/input/*/*.png
+src/server/internal/input/*/*.png
 video/*.mp4
 *.csv
 .eggs/
