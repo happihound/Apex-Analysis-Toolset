@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Apex Analysis Toolset</title>
-    </head>
-    <body>
-        <h1>{{welcome_message|safe }}</h1>
-        <h2>{{explain_header|safe }}</h2>
-        <p>{{explain_body|safe }}</p>
-    </body>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet" type="text/css">
+	<script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+	<script src="{{ url_for('static', filename='js/console.js') }}"></script>
+	<title>Apex Analysis Toolset</title>
+</head>
+
+<body>
+	<h1>{{welcome_message|safe }}</h1>
+	<h2>{{explain_header|safe }}</h2>
+	<p>{{explain_body|safe }}</p>
+	<button class="collapsible collapsible-console">Console Output</button>
+	<div class="collapsible collapsible-console"> <pre id="console-output"></pre> </div>
+</body>
+
 </html>

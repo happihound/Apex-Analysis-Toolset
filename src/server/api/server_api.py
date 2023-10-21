@@ -1,3 +1,6 @@
+import sys
+import io
+
 from server.tools.coordinator import *
 from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
 from flask import render_template, make_response
@@ -67,4 +70,7 @@ class Video_Decomposition(Resource):
 
         # coordinator.runVideoDecompositionTool(options)
         # return make_response(render_template('video_decomp.html', data=options))
+        # print(str(options)+"test_not_webpage")
+        # print("!WEBPAGE!"+" test")
+        print("!WEBPAGE! " + str(options))
         return options
