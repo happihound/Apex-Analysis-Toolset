@@ -13,7 +13,7 @@ class Home(Resource):
         return make_response(render_template('home.html', **data_dict))
 
 
-class Video_Decomp(Resource):
+class Video_Decomposition(Resource):
     def get(self):
         data_dict = {'title': 'Video Decomposition Tool',
                      'simple_options': 'do_frame_extraction=True, do_teammate_extraction=True, do_ocr_extractions=True, do_mini_map_plotter=True, methods_to_run=None - if None, all methods will be run otherwise pass a list of methods to run',
