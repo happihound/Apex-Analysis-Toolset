@@ -1,24 +1,70 @@
+import base64
 import sys
 import io
 import csv
 import multiprocessing
 import os
+import threading
 import cv2
 import time
 import easyocr
 import glob
+from flask_socketio import SocketIO
 import numpy as np
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import easyocr
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from PIL import Image, ImageDraw, ImageFont
 
 
 class ApexUtils:
+    class WebSocketImageSender:
+        def __init__(self, socketio: SocketIO):
+            self.socketio = socketio
+            self.clients = {}  # Dictionary to store clients and their image queues
 
-    def __init__(self):
+        def add_client(self, client_id, image_queue):
+            if client_id not in self.clients:
+                self.clients[client_id] = image_queue
+                self.socketio.emit('new_client', {'client_id': client_id}, namespace='/image')
+
+        def remove_client(self, client_id):
+            if client_id in self.clients:
+                del self.clients[client_id]
+
+        def send_image_to_client(self, client_id, image):
+            if client_id in self.clients:
+                self.clients[client_id].put(image)
+                retval, buffer = cv2.imencode('.jpg', image)
+                encoded_image = base64.b64encode(buffer).decode('utf-8')
+                self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image},
+                                   namespace='/image', room=client_id)
+
+        def start_sending_images(self):
+            for client_id, image_queue in self.clients.items():
+                if not image_queue.empty():
+                    image = image_queue.get()
+                    self.send_image_to_client(client_id, image)
+            self.socketio.sleep(0.05)  # Sleep to yield control to other threads/tasks
+
+    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str, socketio: SocketIO):
+        image_sender = self.WebSocketImageSender(socketio)
+        queued_image.put(cv2.imread('src/internal/default.png'))
+        image_sender.add_client(window_name, queued_image)
+        thread = threading.Thread(target=self.run_display, args=(
+            queued_image, end, window_name, socketio, image_sender), daemon=True)
+        thread.start()
+
+    def run_display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str, socketio: SocketIO, image_sender: WebSocketImageSender):
+        while not end.value:
+            image_sender.start_sending_images()
+
+    def __init__(self, socketio: Optional[SocketIO] = None):
         self._reader = None
         self._model = None
+        self.image_sender = None
+        if socketio:
+            self.image_sender = self.WebSocketImageSender(socketio)
 
     @property
     def super_res_model(self):
@@ -37,7 +83,7 @@ class ApexUtils:
         return self._reader
 
     def extract_numbers_from_image(self, image):
-        image = self.super_res_model.upsample(image)
+        # image = self.super_res_model.upsample(image)
         result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
         return result_OCR
 
@@ -57,29 +103,6 @@ class ApexUtils:
     @staticmethod
     def get_path_to_images() -> str:
         return 'src/server/internal/input/'
-
-    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
-        '''Displays images from a queue
-        queued_image: queue of images to be displayed
-        end: multiprocessing.Value that is set to 1 when the program is to end
-        window_name: name of the window to be displayed
-        '''
-        display_process = multiprocessing.Process(
-            target=self.run_display, args=(queued_image, end, window_name))
-        display_process.start()
-        return display_process
-
-    def run_display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
-        cv2.namedWindow(window_name)
-        cv2.imshow(window_name, cv2.imread('src/server/internal/default.png'))
-        while not end.value:
-            if not queued_image.empty():
-                image = queued_image.get()
-                # resize image if it is over 1000 pixels wide or tall
-                if image.shape[0] > 1000 or image.shape[1] > 1000:
-                    image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
-                cv2.imshow(window_name, image)
-            cv2.waitKey(1)
 
     def extract_text_from_image(self, image):
         # image = self.super_res_model.upsample(image)

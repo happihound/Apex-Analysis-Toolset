@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
+
+    <title>Output Results</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Decomposition Output</h1>
+        
+        <div id="selectedOptions" class="results">
+            <h2>Selected Options:</h2>
+            <ul id="optionsList">
+                <!-- Selected options will be dynamically added here -->
+            </ul>
+        </div>
+        
+        <button class="collapsible collapsible-console">Console Output</button>
+        <div class="content">
+            <pre id="console-output"></pre>
+        </div>
+    </div>
+
+    <script type="application/json" id="options-data">
+        {{ options | tojson }}
+    </script>
+    </div>
+    <div class="button-container">
+        <button id="cancelButton" class="cancel-button">
+            <i class="fas fa-times-circle"></i> Cancel Operation
+        </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/video-decomposition-output.js') }}"></script>
+</body>
+</html>

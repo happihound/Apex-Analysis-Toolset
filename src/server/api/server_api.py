@@ -1,10 +1,17 @@
+from flask import Flask, jsonify, request
 import sys
 import io
+
+from flask_socketio import SocketIO
 
 from server.tools.coordinator import *
 from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
 from flask import render_template, make_response
-import server.tools.coordinator as coordinator
+from server.tools.coordinator import Coordinator as coordinator
+
+coordinator = Coordinator()
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 
 class Home(Resource):
@@ -19,8 +26,8 @@ class Home(Resource):
 class Video_Decomposition(Resource):
     def get(self):
         data_dict = {'title': 'Video Decomposition Tool',
-                     'simple_options': 'do_frame_extraction=True, do_teammate_extraction=True, do_ocr_extractions=True, do_mini_map_plotter=True, methods_to_run=None - if None, all methods will be run otherwise pass a list of methods to run',
-                     'detailed_options': 'do_kill_feed_extraction=False, do_player_evo_extraction=False, do_player_damage_extraction=False, do_mini_map_extraction=False, do_player_gun_extraction=False, do_player_health_extraction=False, do_player_kill_extraction=False, do_player_shield_extraction=False, do_player_tac_extraction=False, do_player_ult_extraction=False, do_teammate_1_health_extraction=False, do_teammate_1_shield_extraction=False, do_teammate_2_health_extraction=False, do_teammate_2_shield_extraction=False, do_zone_timer_extraction=False, do_frames_extraction=False, methods_to_run=None - if None, all methods will be run otherwise pass a list of methods to run'}
+                     'high_qual': 'High quality - Whether to extract the highest quality frames possible. This will take MUCH longer to run.',
+                     'async_mode': 'Async mode - Whether to run the tool asynchronously. This will allow you to run multiple extractions at once, but will take longer to run.', }
         return make_response(render_template('video-decomposition.html', **data_dict))
 
     # options are which sections to extract
@@ -28,6 +35,8 @@ class Video_Decomposition(Resource):
 
     def post(self):
         # We should let the user choose which sections to extract using a checkbox
+        high_quality = request.form.get('highqual')
+        do_async = request.form.get('asyncmode')
         kill_feed = request.form.get('killFeed')
         player_evo = request.form.get('PlayerEvo')
         player_damage = request.form.get('PlayerDamage')
@@ -62,15 +71,42 @@ class Video_Decomposition(Resource):
             'Teammate2Shield': teammate_2_shield,
             'ZoneTimer': zone_timer,
             'frames': frames,
+            'high_quality': high_quality,
+            'async_mode': do_async
         }
 
         for key, value in options.items():
             if value is None:
                 options[key] = False
 
-        # coordinator.runVideoDecompositionTool(options)
-        # return make_response(render_template('video_decomp.html', data=options))
-        # print(str(options)+"test_not_webpage")
-        # print("!WEBPAGE!"+" test")
-        print("!WEBPAGE! " + str(options))
-        return options
+        coordinator.runVideoDecompositionTool(options)
+        print(options)
+        selected_options = []
+        for key, value in options.items():
+            if value:
+                selected_options.append(key)
+        return make_response(render_template('video-decomposition-output.html', **{'options': selected_options}))
+
+
+class KillTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Kill Tracker Tool'}
+        return make_response(render_template('kill-tracker.html', **data_dict))
+
+    def post(self):
+        coordinator.runPlayerKillTracker(socketio)
+        # return make_response(render_template('kill-tracker-output.html'))
+
+
+class CancelOperation(Resource):
+    def post(self):
+        # Get the referer header to determine the page from which the request was sent
+        referer = request.headers.get('Referer')
+        referer = referer.split('/')[-1]
+        if not referer:
+            return {'message': 'Referer not provided'}, 400
+        # Logic to determine the operation to cancel based on the referer
+        if coordinator.cancel(referer):
+            return {'message': 'Cancelled operation'}, 200
+        else:
+            return {'message': 'No operation to cancel'}, 200

@@ -29,7 +29,7 @@ h1 {
     height: auto;
 }
 
-.accordion {
+.accordion, .collapsible, .button-container {
     margin-bottom: 20px;
 }
 
@@ -56,30 +56,28 @@ h1 {
     background-color: #f9f9f9;
 }
 
-.form-section {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.button-container {
+    display: flex;
+    justify-content: center;
 }
 
-.checkbox-container {
-    margin-bottom: 10px;
-}
-
-.submit-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    color: #fff;
+.cancel-button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
 }
 
-.submit-btn:hover {
-    background-color: #218838;
+.cancel-button i {
+    margin-right: 10px;
 }
-    
+
+.cancel-button:hover {
+    background-color: #cc0000;
+}

@@ -1,0 +1,19 @@
+#console-output {
+    white-space: pre-wrap;  /* Wrap text */
+    word-wrap: break-word;  /* Break words */
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.5;
+    padding-left: 30px;  /* Space for line numbers */
+    position: relative;
+}
+
+#console-output::before {
+    content: attr(data-line-numbers);
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0 5px;
+    text-align: right;
+    color: #999;
+    border-right: 1px solid #ccc;
+}

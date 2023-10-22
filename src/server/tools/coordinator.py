@@ -1,5 +1,6 @@
 import os
 import csv
+import threading
 import server.tools.damageTracker as damageTracker
 import server.tools.evoTracker as evoTracker
 import server.tools.killFeedNameFinder as killFeedNameFinder
@@ -31,75 +32,19 @@ methods_to_run=None - if None, all methods will be run otherwise pass a list of 
 
 
 class Coordinator:
+    def __init__(self):
+        self.running_threads = {}
 
-    # __slots__ = ['run_all_methods', 'methods_to_run', 'run_frame_extraction']
+    def runVideoDecompositionTool(self, options):
+        decomp = videoDecompositionTool.VideoDecompositionTool()
+        self.running_threads['video-decomposition'] = decomp
+        decomp.start_in_thread(options)
 
-    # def __init__(self, methods_to_run='all', do_frame_extraction=False):
-    #     if do_frame_extraction:
-    #         self.run_frame_extraction = True
-    #     else:
-    #         self.run_frame_extraction = False
-    #     if methods_to_run is None or type(methods_to_run) is str and methods_to_run.lower() == 'all':
-    #         self.run_all_methods = True
-    #         self.methods_to_run = []
-    #     else:
-    #         self.run_all_methods = False
-    #         self.methods_to_run = methods_to_run
-
-    # def runTrackers(self):
-    #     print("Running the following trackers:", end='\n')
-    #     if self.run_all_methods:
-    #         print("all")
-    #     else:
-    #         print(self.methods_to_run)
-    #     if (self.run_all_methods or 'videoDecompositionTool' in self.methods_to_run) and self.run_frame_extraction:
-    #         print("Running video decomposition tool", end='\n\t')
-    #         self.runVideoDecompositionTool()
-    #     if self.run_all_methods or 'playerKillTracker' in self.methods_to_run:
-    #         print("Running player kill tracker", end='\n\t')
-    #         self.runPlayerKillTracker()
-    #     if self.run_all_methods or 'playerGunTracker' in self.methods_to_run:
-    #         print("Running player gun tracker", end='\n\t')
-    #         self.runPlayerGunTracker()
-    #     if self.run_all_methods or 'playerHealthTrackerAndTeammates' in self.methods_to_run:
-    #         print("Running player health tracker and teammates", end='\n\t')
-    #         self.runPlayerHealthTrackerAndTeammates()
-    #     if self.run_all_methods or 'playerShieldTrackerAndTeammates' in self.methods_to_run:
-    #         print("Running player shield tracker and teammates", end='\n\t')
-    #         self.runPlayerShieldTrackerAndTeammates()
-    #     if not self.run_all_methods or 'playerHealthTracker' in self.methods_to_run:
-    #         print("Running player health tracker", end='\n\t')
-    #         self.runPlayerHealthTracker()
-    #     if not self.run_all_methods or 'playerShieldTracker' in self.methods_to_run:
-    #         print("Running player shield tracker", end='\n\t')
-    #         self.runPlayerShieldTracker()
-    #     if self.run_all_methods or 'playerUltTracker' in self.methods_to_run:
-    #         print("Running player ult tracker", end='\n\t')
-    #         self.runPlayerUltTracker()
-    #     if self.run_all_methods or 'playerTacFinder' in self.methods_to_run:
-    #         print("Running player tac finder", end='\n\t')
-    #         self.runPlayerTacFinder()
-    #     if self.run_all_methods or 'killFeedNameFinder' in self.methods_to_run:
-    #         print("Running kill feed name finder", end='\n\t')
-    #         self.runKillFeedNameFinder()
-    #     if self.run_all_methods or 'evoTracker' in self.methods_to_run:
-    #         print("Running evo tracker", end='\n\t')
-    #         self.runEvoTracker()
-    #     if self.run_all_methods or 'damageTracker' in self.methods_to_run:
-    #         print("Running damage tracker", end='\n\t')
-    #         self.runDamageTracker()
-    #     if self.run_all_methods or 'miniMapPlotter' in self.methods_to_run:
-    #         print("Running mini map plotter", end='\n\t')
-    #         self.runMiniMapPlotter()
-    #     if self.run_all_methods or 'zoneTimer' in self.methods_to_run:
-    #         print("Running zone timer", end='\n\t')
-    #         self.runZoneTimer()
-
-    def runVideoDecompositionTool(options=None):
-        videoDecompositionTool.VideoDecompositionTool().decompose_video(options)
-
-    def runPlayerKillTracker():
-        playerKillTracker.KillTracker().main()
+    def runPlayerKillTracker(self, socketio):
+        kill_tracker = playerKillTracker.KillTracker()
+        kill_tracker.set_socketio(socketio)
+        self.running_threads['kill-tracker'] = kill_tracker
+        kill_tracker.start_in_thread()
 
     def runPlayerGunTracker():
         playerGunTracker.GunTracker().main()
@@ -145,9 +90,17 @@ class Coordinator:
     def runZoneTimer():
         ZoneTimerTracker.ZoneTimerTracker().main()
 
+    def cancel(self, operation_name):
+        print(f"Attempting to cancel {operation_name}")
+        if operation_name in self.running_threads:
+            self.running_threads[operation_name].stop()
+            del self.running_threads[operation_name]
+            print(f"Successfully cancelled {operation_name}")
+            return True
+        return False
 
-# if __name__ == '__main__':
-#     tracker = Coordinator('all', False)
-#     tracker.runTrackers()
-#     util.ApexUtils().combineAllCSVs()
-#     util.ApexUtils().visualize()
+        # if __name__ == '__main__':
+        #     tracker = Coordinator('all', False)
+        #     tracker.runTrackers()
+        #     util.ApexUtils().combineAllCSVs()
+        #     util.ApexUtils().visualize()

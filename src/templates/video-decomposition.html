@@ -1,42 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/decomp.css') }}">
-	<script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-	<script src="{{ url_for('static', filename='js/console.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/decomp.js') }}"></script>
-	<title>{{ title }}</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition.css') }}">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/video-decomposition.js') }}"></script>
+    <title>{{ title }}</title>
 </head>
-
 <body>
-	<div class="container">
-		<h1>{{ title }}</h1>
-		<div class="image-container"> <img src="{{ url_for('static', filename='images/Decomp_Key.jpg') }}" alt="Decomposition Key" class="responsive-img"> </div>
-		<div class="accordion">
-			<!-- Simple Options -->
-			<button class="collapsible collapsible-decomp">Click to Show Simple Options</button>
-			<div class="content">
-				<p>{{ simple_options }}</p>
-			</div>
-			<!-- Detailed Options -->
-			<button class="collapsible collapsible-decomp">Click to Show Detailed Options</button>
-			<div class="content">
-				<p>{{ detailed_options }}</p>
-			</div>
-		</div>
-		<form action="/video-decomposition" method="post" class="form-section">
-			<!-- Select All Checkbox -->
-			<div class="checkbox-container">
-				<input type="checkbox" id="selectAll">
-				<label for="selectAll">Select All</label>
-			</div>
-			<!-- Checkboxes -->
-			<input type="checkbox" id="killFeed" class="section" name="killFeed" value="True">
-			<label for="killFeed">Kill Feed</label>
+    <div class="container">
+        <h1>{{ title }}</h1>
+
+        <form action="/video-decomposition" method="post" class="form-section">
+            <div class="image-container">
+                <img src="{{ url_for('static', filename='images/Decomp_Key.jpg') }}" alt="Decomposition Key" class="responsive-img">
+            </div>
+
+            <div class="accordion">
+                <!-- Simple Options -->
+                <button type="button" class="collapsible collapsible-decomp">Click to Show Simple Options</button>
+                <div class="content">
+                    <div class="checkbox-container">
+                        <p>Options</p>
+                        <input type="checkbox" id="highqual" class="section" name="highqual" value="True">
+                        <label for="highqual">{{ high_qual }}</label>
+                        <br>
+                        <input type="checkbox" id="asyncmode" class="section" name="asyncmode" value="True">
+                        <label for="asyncmode">{{ async_mode }}</label>
+                    </div>
+                </div>
+
+                <!-- Detailed Options -->
+                <!-- Add detailed options here if needed -->
+            </div>
+
+            <!-- Additional Form Sections -->
+            <div class="form-section">
+                <!-- Select All Checkbox -->
+                <div class="checkbox-container">
+                    <input type="checkbox" id="selectAll">
+                    <label for="selectAll">Select All</label>
+                </div>
+                <!-- Checkboxes -->
+                <input type="checkbox" id="killFeed" class="section" name="killFeed" value="True">
+                <label for="killFeed">Kill Feed</label>
 			<br>
 			<input type="checkbox" id="PlayerEvo" class="section" name="PlayerEvo" value="True">
 			<label for="PlayerEvo">Player Evo</label>
@@ -83,10 +93,14 @@
 			<input type="checkbox" id="frames" class="section" name="frames" value="True">
 			<label for="frames">Frames</label>
 			<br>
-			<input type="submit" value="Submit" class="submit-btn"> </form>
-		<button class="collapsible collapsible-console">Console Output</button>
-		<div class="collapsible collapsible-console"> <pre id="console-output"></pre> </div>
-	</div>
-</body>
+			<input type="submit" value="Submit" class="submit-btn">
+            </div>
+        </form>
 
+        <button class="collapsible collapsible-console">Console Output</button>
+        <div class="content">
+            <pre id="console-output"></pre>
+        </div>
+    </div>
+</body>
 </html>

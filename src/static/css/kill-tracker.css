@@ -1,0 +1,111 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.responsive-img {
+    max-width: 100%;
+    height: auto;
+}
+
+.accordion, .collapsible, .button-container {
+    margin-bottom: 20px;
+}
+
+.collapsible {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+}
+
+.active, .collapsible:hover {
+    background-color: #555;
+}
+
+.content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    background-color: #f9f9f9;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.cancel-button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.cancel-button i {
+    margin-right: 10px;
+}
+
+.cancel-button:hover {
+    background-color: #cc0000;
+}
+
+.submit-button{
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.submit-button i {
+    margin-right: 10px;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.kill-image {
+    width: 100%;
+    height: auto;
+    align-items: center;
+
+}

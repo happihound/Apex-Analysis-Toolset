@@ -1,4 +1,5 @@
 import csv
+import threading
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,9 +13,12 @@ plt.bbox_inches = "tight"
 
 class KillTracker:
     __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
-                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'rolling_array']
+                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'rolling_array', 'stop_event', 'running_thread', 'socketio']
 
     def __init__(self):
+        self.stop_event = threading.Event()
+        self.socketio = None
+        self.running_thread = None
         self.queued_image = None
         self.frame_number = 0
         self.match_count = 0
@@ -24,12 +28,18 @@ class KillTracker:
         self.path_to_images = util().get_path_to_images() + "/playerKills"
         self.rolling_array = [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
 
+    def set_socketio(self, socketio):
+        self.socketio = socketio
+
     def track_kills(self, queued_image, end) -> None:
         self.queued_image = queued_image
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
 
         with tqdm(files) as pbar:
             for file in pbar:
+                if self.check_stop():
+                    end.value = 1
+                    break
                 image = cv2.imread(file)
                 image = self.crop_icon_dynamic(image)
                 self.frame_number = self.apex_utils.extract_frame_number(file)
@@ -162,18 +172,36 @@ class KillTracker:
     @staticmethod
     def filter_values(values):
         values = KillTracker().replace_lesser_values(values)
-        print(f"replaced lesser values: {values}")
         values = KillTracker().ensure_increasing(values)
-        print(f"ensured increasing: {values}")
         return values
 
+    def start_in_thread(self):
+        if self.running_thread and self.running_thread.is_alive():
+            print("Kill tracker is already running")
+            return
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread.start()
+
+    def check_stop(self):
+        if self.stop_event.is_set():
+            print("Stopping kill tracker")
+            print('!WEBPAGE! !TOGGLE!')
+            return True
+        return False
+
+    def stop(self):
+        self.stop_event.set()
+
     def main(self):
+        print('!WEBPAGE! !TOGGLE!')
         print('Starting kill tracker')
         end = multiprocessing.Value("i", False)
         self.queued_image = multiprocessing.Queue()
-        self.apex_utils.display(self.queued_image, end, 'Kill Tracker')
+        self.apex_utils.display(self.queued_image, end, 'kill-tracker', self.socketio)
         self.track_kills(self.queued_image, end)
         print('Finished kill tracker')
+        print('!WEBPAGE! !TOGGLE!')
 
 
 if __name__ == '__main__':

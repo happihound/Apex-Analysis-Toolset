@@ -2,10 +2,10 @@ import sys
 import io
 import threading
 import time
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 from flask_restful import Resource, Api
-from server.api.server_api import Home, Video_Decomposition
-from flask_socketio import SocketIO
+from server.api.server_api import Home, Video_Decomposition, CancelOperation, KillTracker
+from flask_socketio import SocketIO, join_room
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
@@ -22,7 +22,6 @@ def get_console_output():
 @staticmethod
 def get_website_console_output():
     data = sys.stdout.get_value_website()
-    sys.stdout.clear()
     return data
 
 
@@ -46,10 +45,13 @@ class DualOutput:
         return self.cont_buffer.getvalue()
 
     def get_value_website(self):
+        toggle = False
         return_list = []
         for line in self.cont_buffer.getvalue().splitlines():
-            if "!WEBPAGE!" in line:
-                return_list.append(line.replace("!WEBPAGE!", ""))
+            if "!TOGGLE!" in line:
+                toggle = not toggle
+            if "!WEBPAGE!" in line or toggle:
+                return_list.append(line.replace("!WEBPAGE!", "").replace("!TOGGLE!", ""))
         return return_list
 
     def clear(self):
@@ -64,15 +66,6 @@ class ConsoleOutput(Resource):
         return console_output
 
 
-class ConsoleOutputFormatted(Resource):
-    def get(self):
-        console_output = get_console_output()
-        formatted_output = "<pre>" + console_output + "</pre>"
-        response = make_response(formatted_output)
-        response.headers['Content-Type'] = 'text/html'
-        return response
-
-
 class ConsoleOutputForWebpages(Resource):
     def get(self):
         console_output = get_website_console_output()
@@ -85,12 +78,18 @@ sys.stderr = DualOutput(sys.stderr)
 
 def emit_console_output():
     while True:
-        console_output = get_website_console_output()
-        socketio.emit('console_output', {'data': console_output})
+        socketio.emit('console_output', {'data': get_website_console_output()})
         time.sleep(1)
 
 
-@socketio.on('connect')
+@socketio.on('connect', namespace='/image')
+def connect():
+    client_id = request.args.get('client_id')
+    join_room(client_id)
+    print(f'Client {client_id} connected')
+
+
+@ socketio.on('connect')
 def handle_connect():
     print('Client connected')
     socketio.start_background_task(emit_console_output)
@@ -98,13 +97,16 @@ def handle_connect():
 
 api.add_resource(Home, '/')
 
+api.add_resource(CancelOperation, '/cancel')
+
 api.add_resource(Video_Decomposition, '/video-decomposition')
 
-api.add_resource(ConsoleOutput, '/get-console-output')
-
-api.add_resource(ConsoleOutputFormatted, '/get-console-output-formatted')
+api.add_resource(ConsoleOutput, '/running_console')
 
 api.add_resource(ConsoleOutputForWebpages, '/get-console-output-for-webpages')
+
+api.add_resource(KillTracker, '/kill-tracker')
+
 
 if __name__ == '__main__':
     # threading.Thread(target=emit_console_output).start()
