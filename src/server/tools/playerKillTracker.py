@@ -15,26 +15,22 @@ class KillTracker:
     __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
                  'results', 'result_image_number', 'path_to_images', 'apex_utils', 'rolling_array', 'stop_event', 'running_thread', 'socketio']
 
-    def __init__(self):
+    def __init__(self, socketio):
         self.stop_event = threading.Event()
-        self.socketio = None
+        self.socketio = socketio
         self.running_thread = None
         self.queued_image = None
+        self.end = None
         self.frame_number = 0
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.apex_utils = util()
-        self.path_to_images = util().get_path_to_images() + "/playerKills"
+        self.apex_utils = util(socketio=socketio)
+        self.path_to_images = self.apex_utils.get_path_to_images() + "/playerKills"
         self.rolling_array = [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
 
-    def set_socketio(self, socketio):
-        self.socketio = socketio
-
     def track_kills(self, queued_image, end) -> None:
-        self.queued_image = queued_image
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
-
         with tqdm(files) as pbar:
             for file in pbar:
                 if self.check_stop():
@@ -47,6 +43,8 @@ class KillTracker:
                 result = self.apex_utils.extract_numbers_from_image(image=image)
 
                 if self.process_result(result, pbar):
+                    if self.queued_image.full():
+                        self.queued_image.get()
                     self.queued_image.put(image)
                 else:
                     self.results.append(self.results[-1])
@@ -54,7 +52,7 @@ class KillTracker:
 
         print(f'found {self.match_count} total matches')
         end.value = 1
-        self.results = KillTracker().filter_values(self.results)
+        self.results = self.filter_values(self.results)
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Kills"], name='Player Kills')
 
@@ -120,12 +118,10 @@ class KillTracker:
         final_cropped = image[:, start_col:]
         return final_cropped
 
-    @staticmethod
-    def most_frequent(lst):
+    def most_frequent(self, lst):
         return max(set(lst), key=lst.count)
 
-    @staticmethod
-    def replace_lesser_values(values):
+    def replace_lesser_values(self, values):
         i = 0
         last_valid_value = None  # To store the last valid value before encountering x
 
@@ -157,8 +153,7 @@ class KillTracker:
 
         return values
 
-    @staticmethod
-    def ensure_increasing(values):
+    def ensure_increasing(self, values):
         last_highest = 0
         return_values = []
         for value in values:
@@ -169,10 +164,9 @@ class KillTracker:
                 last_highest = value
         return return_values
 
-    @staticmethod
-    def filter_values(values):
-        values = KillTracker().replace_lesser_values(values)
-        values = KillTracker().ensure_increasing(values)
+    def filter_values(self, values):
+        values = self.replace_lesser_values(values)
+        values = self.ensure_increasing(values)
         return values
 
     def start_in_thread(self):
@@ -192,14 +186,15 @@ class KillTracker:
 
     def stop(self):
         self.stop_event.set()
+        self.end.value = 1
 
     def main(self):
         print('!WEBPAGE! !TOGGLE!')
         print('Starting kill tracker')
-        end = multiprocessing.Value("i", False)
-        self.queued_image = multiprocessing.Queue()
-        self.apex_utils.display(self.queued_image, end, 'kill-tracker', self.socketio)
-        self.track_kills(self.queued_image, end)
+        self.end = multiprocessing.Value("i", False)
+        self.queued_image = multiprocessing.Queue(maxsize=2)
+        self.apex_utils.display(self.queued_image, self.end, 'kill-tracker')
+        self.track_kills(self.queued_image, self.end)
         print('Finished kill tracker')
         print('!WEBPAGE! !TOGGLE!')
 

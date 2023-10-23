@@ -2,16 +2,19 @@ from flask import Flask, jsonify, request
 import sys
 import io
 
-from flask_socketio import SocketIO
 
 from server.tools.coordinator import *
 from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
 from flask import render_template, make_response
-from server.tools.coordinator import Coordinator as coordinator
+from util.apexUtils import ApexUtils
+from server.tools.coordinator import Coordinator as coord
 
-coordinator = Coordinator()
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+global coordinator_local
+
+
+def set_socketio(socketio1):
+    global coordinator_local
+    coordinator_local = coord(socketio=socketio1)
 
 
 class Home(Resource):
@@ -78,8 +81,8 @@ class Video_Decomposition(Resource):
         for key, value in options.items():
             if value is None:
                 options[key] = False
-
-        coordinator.runVideoDecompositionTool(options)
+        global coordinator_local
+        coordinator_local.runVideoDecompositionTool(options)
         print(options)
         selected_options = []
         for key, value in options.items():
@@ -94,7 +97,8 @@ class KillTracker(Resource):
         return make_response(render_template('kill-tracker.html', **data_dict))
 
     def post(self):
-        coordinator.runPlayerKillTracker(socketio)
+        global coordinator_local
+        coordinator_local.runPlayerKillTracker()
         # return make_response(render_template('kill-tracker-output.html'))
 
 
@@ -106,7 +110,8 @@ class CancelOperation(Resource):
         if not referer:
             return {'message': 'Referer not provided'}, 400
         # Logic to determine the operation to cancel based on the referer
-        if coordinator.cancel(referer):
+        global coordinator_local
+        if coordinator_local.cancel(referer):
             return {'message': 'Cancelled operation'}, 200
         else:
             return {'message': 'No operation to cancel'}, 200

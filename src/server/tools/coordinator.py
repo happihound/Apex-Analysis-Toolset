@@ -32,17 +32,17 @@ methods_to_run=None - if None, all methods will be run otherwise pass a list of 
 
 
 class Coordinator:
-    def __init__(self):
+    def __init__(self, socketio):
         self.running_threads = {}
+        self.socketio = socketio
 
     def runVideoDecompositionTool(self, options):
         decomp = videoDecompositionTool.VideoDecompositionTool()
         self.running_threads['video-decomposition'] = decomp
         decomp.start_in_thread(options)
 
-    def runPlayerKillTracker(self, socketio):
-        kill_tracker = playerKillTracker.KillTracker()
-        kill_tracker.set_socketio(socketio)
+    def runPlayerKillTracker(self):
+        kill_tracker = playerKillTracker.KillTracker(self.socketio)
         self.running_threads['kill-tracker'] = kill_tracker
         kill_tracker.start_in_thread()
 

@@ -4,12 +4,15 @@ import threading
 import time
 from flask import Flask, make_response, request
 from flask_restful import Resource, Api
-from server.api.server_api import Home, Video_Decomposition, CancelOperation, KillTracker
+import server.api.server_api as server_api
 from flask_socketio import SocketIO, join_room
 
 app = Flask(__name__)
+global socketio
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 api = Api(app)
+
+server_api.set_socketio(socketio)
 
 
 @staticmethod
@@ -86,7 +89,7 @@ def emit_console_output():
 def connect():
     client_id = request.args.get('client_id')
     join_room(client_id)
-    print(f'Client {client_id} connected')
+    print(f'Client {client_id} connected in image namespace with {request.sid} as sessid')
 
 
 @ socketio.on('connect')
@@ -95,17 +98,17 @@ def handle_connect():
     socketio.start_background_task(emit_console_output)
 
 
-api.add_resource(Home, '/')
+api.add_resource(server_api.Home, '/')
 
-api.add_resource(CancelOperation, '/cancel')
+api.add_resource(server_api.CancelOperation, '/cancel')
 
-api.add_resource(Video_Decomposition, '/video-decomposition')
+api.add_resource(server_api.Video_Decomposition, '/video-decomposition')
 
 api.add_resource(ConsoleOutput, '/running_console')
 
 api.add_resource(ConsoleOutputForWebpages, '/get-console-output-for-webpages')
 
-api.add_resource(KillTracker, '/kill-tracker')
+api.add_resource(server_api.KillTracker, '/kill-tracker')
 
 
 if __name__ == '__main__':

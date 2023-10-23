@@ -22,11 +22,13 @@ class ApexUtils:
         def __init__(self, socketio: SocketIO):
             self.socketio = socketio
             self.clients = {}  # Dictionary to store clients and their image queues
+            self.socketio.start_background_task(target=self.start_sending_images)
 
         def add_client(self, client_id, image_queue):
             if client_id not in self.clients:
                 self.clients[client_id] = image_queue
                 self.socketio.emit('new_client', {'client_id': client_id}, namespace='/image')
+                print(f'Added client {client_id}')
 
         def remove_client(self, client_id):
             if client_id in self.clients:
@@ -34,37 +36,31 @@ class ApexUtils:
 
         def send_image_to_client(self, client_id, image):
             if client_id in self.clients:
-                self.clients[client_id].put(image)
                 retval, buffer = cv2.imencode('.jpg', image)
                 encoded_image = base64.b64encode(buffer).decode('utf-8')
+                print(f'Sent image to client {client_id} with shape {image.shape}')
                 self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image},
                                    namespace='/image', room=client_id)
 
         def start_sending_images(self):
-            for client_id, image_queue in self.clients.items():
-                if not image_queue.empty():
-                    image = image_queue.get()
-                    self.send_image_to_client(client_id, image)
-            self.socketio.sleep(0.05)  # Sleep to yield control to other threads/tasks
+            while True:
+                for client_id, image_queue in list(self.clients.items()):
+                    if not image_queue.empty():
+                        image = image_queue.get()
+                        self.send_image_to_client(client_id, image)
+                        self.socketio.sleep(0.01)
+                    else:
+                        self.socketio.sleep(0.01)
 
-    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str, socketio: SocketIO):
-        image_sender = self.WebSocketImageSender(socketio)
+    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
         queued_image.put(cv2.imread('src/internal/default.png'))
-        image_sender.add_client(window_name, queued_image)
-        thread = threading.Thread(target=self.run_display, args=(
-            queued_image, end, window_name, socketio, image_sender), daemon=True)
-        thread.start()
+        self.image_sender.add_client(window_name,  queued_image)
 
-    def run_display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str, socketio: SocketIO, image_sender: WebSocketImageSender):
-        while not end.value:
-            image_sender.start_sending_images()
-
-    def __init__(self, socketio: Optional[SocketIO] = None):
+    def __init__(self, socketio):
         self._reader = None
         self._model = None
-        self.image_sender = None
-        if socketio:
-            self.image_sender = self.WebSocketImageSender(socketio)
+        self.socketio = socketio
+        self.image_sender = ApexUtils.WebSocketImageSender(socketio)
 
     @property
     def super_res_model(self):
