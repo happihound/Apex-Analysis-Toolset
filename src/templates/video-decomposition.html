@@ -5,9 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
     <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/console.js') }}"></script>
     <script src="{{ url_for('static', filename='js/video-decomposition.js') }}"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
     <title>{{ title }}</title>
 </head>
 <body>
@@ -96,10 +99,8 @@
 			<input type="submit" value="Submit" class="submit-btn">
             </div>
         </form>
-
-        <button class="collapsible collapsible-console">Console Output</button>
-        <div class="content">
-            <pre id="console-output"></pre>
+        <br>
+        <div id=insert_console class="console-output">
         </div>
     </div>
 </body>

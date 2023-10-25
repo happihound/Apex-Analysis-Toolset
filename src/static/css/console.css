@@ -1,19 +1,44 @@
 #console-output {
-    white-space: pre-wrap;  /* Wrap text */
-    word-wrap: break-word;  /* Break words */
-    font-family: 'Courier New', Courier, monospace;
-    line-height: 1.5;
-    padding-left: 30px;  /* Space for line numbers */
-    position: relative;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #d7d7d7 !important;
+    position: relative !important;
+    padding-left: 15px !important;
+    max-height: 330px !important;
 }
 
-#console-output::before {
-    content: attr(data-line-numbers);
-    position: absolute;
-    left: 0;
-    top: 0;
-    padding: 0 5px;
-    text-align: right;
-    color: #999;
-    border-right: 1px solid #ccc;
+.collapsible-console {
+    margin-bottom: 10px !important;
+    padding: 10px 30px !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    border: none !important;
+    text-align: left !important;
+    outline: none !important;
+    font-size: 16px !important;
+    background-color: #28a745 !important; /* Green background */
+    border-radius: 5px !important; /* Rounded corners */
+    transition: background-color 0.3s, transform 0.3s !important; /* Smooth transition for hover effect */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important; /* Slight shadow for depth */
+    position: relative !important; /* Ensure that child absolute positioning is relative to this element */
+}
+
+.collapsible-console:hover {
+    background-color: #218838 !important; /* Slightly darker green on hover */
+}
+
+.chevron-icon {
+    position: absolute !important;
+    left: 10px !important;
+    transition: transform 0.3s !important;
+    font-size: 12px !important; /* Optional: Set the font size of the chevron icon */
+}
+
+.collapsible-console.active .chevron-icon {
+    transform: rotate(180deg) !important;
 }

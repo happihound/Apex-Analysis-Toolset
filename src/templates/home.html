@@ -2,22 +2,35 @@
 <html>
 
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet" type="text/css">
-	<title>Apex Analysis Toolset</title>
-    <div id="client-id" style="display: none;">Home</div>
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- Load external stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    
+    <!-- Load custom stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+        <h1>{{welcome_message|safe }}</h1>
 </head>
 
 <body>
-	<h1>{{welcome_message|safe }}</h1>
-	<h2>{{explain_header|safe }}</h2>
-	<p>{{explain_body|safe }}</p>
-	<button class="collapsible collapsible-console">Console Output</button>
-	<div class="collapsible collapsible-console"> <pre id="console-output"></pre> </div>
+    <div class="container">
+        <!-- Hidden div to store client ID -->
+        <div id="client-id" style="display: none;">Home</div>
+        <!-- Page content -->
+        <h2>{{explain_header|safe }}</h2>
+        <p>{{explain_body|safe }}</p>
 
-	<script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-	<script src="{{ url_for('static', filename='js/console.js') }}"></script>
+        <div id=insert_console class="console-output">
 
+        </div>
+        <!-- Load external scripts -->
+        <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+        
+        <!-- Load custom scripts -->
+        <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    </div>
 </body>
-</html> 
+</html>
