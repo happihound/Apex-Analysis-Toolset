@@ -55,6 +55,8 @@ class DualOutput:
                 toggle = not toggle
             if "!WEBPAGE!" in line or toggle:
                 return_list.append(line.replace("!WEBPAGE!", "").replace("!TOGGLE!", ""))
+        if len(return_list) == 0:
+            return
         return return_list
 
     def clear(self):
@@ -81,7 +83,9 @@ sys.stderr = DualOutput(sys.stderr)
 
 def emit_console_output():
     while True:
-        socketio.emit('console_output', {'data': get_website_console_output()})
+        console = get_website_console_output()
+        if console is not None:
+            socketio.emit('console_output', {'data': console})
         time.sleep(1)
 
 

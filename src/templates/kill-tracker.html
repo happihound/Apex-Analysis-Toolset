@@ -2,17 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <div id="client-id" style="display: none;">{{ client_id }}</div>
+    <div id="submit-endpoint" style="display: none;">/kill-tracker</div>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/kill-tracker.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kill-tracker.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cancel-button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
     <title>Kill Tracker</title>
 
 </head>
 <body>
     <div id="status"> {{ status }}</div>
-    <div class="kill-image" >
-        <img id="kill-image" alt="Kill Tracker Image" src=""/>
+    <div class="dynamicImage" >
+        <img id="dynamicImage" alt="Kill Tracker Image" src=""/>
     </div>
 
     <div class="button-container">
@@ -25,7 +29,17 @@
             <i class="fas fa-check-circle "></i> Run Kill Tracker
         </button>
     </div>
+        <button class="collapsible collapsible-console">Console Output</button>
+        <div class="content">
+            <pre id="console-output"></pre>
+        </div>
+    </div>
      <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/kill-tracker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dynamic-image.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cancel-button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
+
 </body>
 </html>

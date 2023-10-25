@@ -93,13 +93,24 @@ class Video_Decomposition(Resource):
 
 class KillTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Kill Tracker Tool'}
+        data_dict = {'title': 'Kill Tracker Tool', 'client_id': 'kill-tracker'}
         return make_response(render_template('kill-tracker.html', **data_dict))
 
     def post(self):
         global coordinator_local
         coordinator_local.runPlayerKillTracker()
         # return make_response(render_template('kill-tracker-output.html'))
+
+
+class PlayerGunTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Player Gun Tracker Tool'}
+        return make_response(render_template('player-gun-tracker.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runPlayerGunTracker()
+        return make_response(render_template('player-gun-tracker-output.html'))
 
 
 class CancelOperation(Resource):

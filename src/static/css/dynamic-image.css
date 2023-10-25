@@ -1,0 +1,12 @@
+/* Image styling */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.responsive-img {
+    max-width: 100%;
+    height: auto;
+}

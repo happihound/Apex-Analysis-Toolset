@@ -5,9 +5,8 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet" type="text/css">
-	<script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-	<script src="{{ url_for('static', filename='js/console.js') }}"></script>
 	<title>Apex Analysis Toolset</title>
+    <div id="client-id" style="display: none;">Home</div>
 </head>
 
 <body>
@@ -16,6 +15,9 @@
 	<p>{{explain_body|safe }}</p>
 	<button class="collapsible collapsible-console">Console Output</button>
 	<div class="collapsible collapsible-console"> <pre id="console-output"></pre> </div>
-</body>
 
+	<script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+	<script src="{{ url_for('static', filename='js/console.js') }}"></script>
+
+</body>
 </html> 

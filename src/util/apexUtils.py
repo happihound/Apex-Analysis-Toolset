@@ -39,7 +39,7 @@ class ApexUtils:
                 retval, buffer = cv2.imencode('.jpg', image)
                 encoded_image = base64.b64encode(buffer).decode('utf-8')
                 print(f'Sent image to client {client_id} with shape {image.shape}')
-                self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image},
+                self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image, 'altText': str(client_id)},
                                    namespace='/image', room=client_id)
 
         def start_sending_images(self):

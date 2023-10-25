@@ -60,22 +60,6 @@ h1 {
     margin-bottom: 10px;
 }
 
-.submit-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-btn:hover {
-    background-color: #218838;
-}
-
 .flex-container {
     display: flex;
     flex-wrap: wrap;

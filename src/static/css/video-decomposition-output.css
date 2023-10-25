@@ -56,28 +56,3 @@ h1 {
     background-color: #f9f9f9;
 }
 
-.button-container {
-    display: flex;
-    justify-content: center;
-}
-
-.cancel-button {
-    background-color: #ff4d4d;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-.cancel-button i {
-    margin-right: 10px;
-}
-
-.cancel-button:hover {
-    background-color: #cc0000;
-}
