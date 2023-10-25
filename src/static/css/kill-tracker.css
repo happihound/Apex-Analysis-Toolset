@@ -6,25 +6,28 @@ body {
     background-color: #f4f4f4;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-}
-
 h1 {
     text-align: center;
     color: #333;
 }
 
-.image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
+.container {
+    width: 80%;
+    margin: auto auto;
+    overflow: hidden;
+    padding: 0 18px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 18px;
 }
 
-.responsive-img {
-    max-width: 100%;
-    height: auto;
+#status {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
 }

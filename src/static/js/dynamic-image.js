@@ -11,14 +11,9 @@ const statusElement = document.getElementById('status');
   });
     console.log(socket)
 
-
-    // var socket = io.connect(socketUrl);
-    console.log('Connecting to WebSocket at:', socketUrl);
-
     socket.on('connect', function() {
         console.log('WebSocket connected!');
         statusElement.textContent = 'Connected';
-
     });
 
     socket.on('disconnect', () => {
@@ -33,7 +28,5 @@ const statusElement = document.getElementById('status');
         imageElement.src = 'data:image/jpeg;base64,' + data.image;
         imageElement.alt = data.altText;
         statusElement.textContent = 'Connected (Image Received)';
-    
   }});
-
 });

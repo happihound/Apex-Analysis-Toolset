@@ -38,7 +38,7 @@ class ApexUtils:
             if client_id in self.clients:
                 retval, buffer = cv2.imencode('.jpg', image)
                 encoded_image = base64.b64encode(buffer).decode('utf-8')
-                print(f'Sent image to client {client_id} with shape {image.shape}')
+                # print(f'Sent image to client {client_id} with shape {image.shape}')
                 self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image, 'altText': str(client_id)},
                                    namespace='/image', room=client_id)
 

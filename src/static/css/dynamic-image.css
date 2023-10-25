@@ -1,14 +1,20 @@
-/* Image styling */
-.image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
+/* Container for image */
+.imageContainer {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    width: 100% !important; /* Take the full width of the parent container */
+    height: auto !important; /* Adjust height automatically */
+    position: relative !important;
+    min-height: 200px !important; /* Minimum height of the image container */
 }
 
-.responsive-img {
-    width: 100%;
-    height: auto;
-    align-items: center;
-
+/* Image styling */
+.dynamicImage {
+    max-width: 75% !important; /* Maximum width of the image */
+    max-height: 200px !important; /* Maximum height of the image */
+    width: auto !important; /* Adjust width automatically */
+    height: 400 !important; /* Adjust height automatically */
+    object-fit: contain !important; /* Ensure the image is contained within its box, maintaining its aspect ratio */
 }
