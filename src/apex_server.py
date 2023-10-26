@@ -51,10 +51,15 @@ class DualOutput:
         toggle = False
         return_list = []
         for line in self.cont_buffer.getvalue().splitlines():
-            if "!TOGGLE!" in line:
-                toggle = not toggle
+            if "!ON!" in line:
+                toggle = True
+                continue
+            if "!OFF!" in line:
+                toggle = False
+                continue
             if "!WEBPAGE!" in line or toggle:
-                return_list.append(line.replace("!WEBPAGE!", "").replace("!TOGGLE!", ""))
+                return_list.append(line.replace("!WEBPAGE!", "").replace(
+                    "!TOGGLE!", "").replace("!ON!", "").replace("!OFF!", ""))
         if len(return_list) == 0:
             return
         return return_list
@@ -113,6 +118,12 @@ api.add_resource(ConsoleOutput, '/running_console')
 api.add_resource(ConsoleOutputForWebpages, '/get-console-output-for-webpages')
 
 api.add_resource(server_api.KillTracker, '/kill-tracker')
+
+api.add_resource(server_api.PlayerGunTracker, '/gun-tracker')
+
+api.add_resource(server_api.DamageTracker, '/damage-tracker')
+
+api.add_resource(server_api.EvoTracker, '/evo-tracker')
 
 
 if __name__ == '__main__':

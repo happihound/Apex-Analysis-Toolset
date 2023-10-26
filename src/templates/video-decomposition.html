@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
     <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/console.js') }}"></script>
     <script src="{{ url_for('static', filename='js/video-decomposition.js') }}"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
-    <title>{{ title }}</title>
+    <title>Video Decomposition</title>
 </head>
 <body>
     <div class="container">
@@ -96,7 +97,11 @@
 			<input type="checkbox" id="frames" class="section" name="frames" value="True">
 			<label for="frames">Frames</label>
 			<br>
-			<input type="submit" value="Submit" class="submit-btn">
+			   <div class="button-container">
+                <button id="submitButton" class="submit-button">
+            <i class="fas fa-check-circle "></i> Run {{title}}
+        </button>
+    </div>
             </div>
         </form>
         <br>

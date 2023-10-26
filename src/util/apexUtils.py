@@ -28,7 +28,7 @@ class ApexUtils:
             if client_id not in self.clients:
                 self.clients[client_id] = image_queue
                 self.socketio.emit('new_client', {'client_id': client_id}, namespace='/image')
-                print(f'Added client {client_id}')
+                print(f'!WEBPAGE! Added client {client_id}')
 
         def remove_client(self, client_id):
             if client_id in self.clients:
@@ -127,7 +127,7 @@ class ApexUtils:
             data = lowess(data, frame, is_sorted=False, frac=lowess_frac,
                           it=lowess_it, delta=lowess_delta, return_sorted=False)
         if data is None or frame is None:
-            print("No data to save!")
+            print("!WEBPAGE! No data to save!")
             raise Exception
         try:
             if not name:
@@ -147,7 +147,7 @@ class ApexUtils:
                     writer.writerow([frame[i], data[i]])
                 print(f"Saved as {name}.csv")
         except FileExistsError:
-            print(f"{name}.csv already exists, it will be overwritten!")
+            print(f"!WEBPAGE! {name}.csv already exists, it will be overwritten!")
             # confirm = input("Are you sure you want to continue? (y/n): ")
             confirm = 'y'
             if confirm == 'y':
@@ -160,9 +160,9 @@ class ApexUtils:
                     writer.writerow(headers)
                     for i in range(len(data)):
                         writer.writerow([frame[i], data[i]])
-                    print(f"Saved as {name}.csv")
+                    print(f"!WEBPAGE! Saved as {name}.csv")
             else:
-                print("Save cancelled")
+                print("!WEBPAGE! Save cancelled")
                 return
         except Exception as e:
             print(f"Error: {e}")
@@ -178,7 +178,7 @@ class ApexUtils:
         # Iterate through each CSV file in the folder
         for filename in os.listdir(folder_path):
             if filename.endswith('.csv'):
-                print(f"Processing: {filename}")  # Print the filename being processed
+                print(f"!WEBPAGE! Processing: {filename}")  # Print the filename being processed
                 with open(os.path.join(folder_path, filename), 'r') as file:
                     reader = csv.reader(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     next(reader, None)  # Skip header row if it exists

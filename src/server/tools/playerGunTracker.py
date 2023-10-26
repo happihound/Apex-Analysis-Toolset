@@ -1,3 +1,4 @@
+import threading
 import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
@@ -29,20 +30,24 @@ This describes the frame number and the guns detected on that frame.
 
 
 class GunTracker:
-    __slots__ = ['path_to_images', 'queued_image', 'end', 'apex_utils',
-                 'frame_number', 'match_count', 'results', 'result_image_number', 'apex_utils']
+    __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
+                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'stop_event', 'running_thread', 'socketio', 'running_thread']
 
-    def __init__(self):
+    def __init__(self, socketio):
         self.queued_image = None
         self.frame_number = 0
+        self.end = None
+        self.stop_event = threading.Event()
+        self.running_thread = None
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.apex_utils = util()
+        self.apex_utils = util(socketio=socketio)
         self.path_to_images = self.apex_utils.get_path_to_images() + "/playerGuns"
 
     def track_gun(self, queued_image, end) -> None:
         self.queued_image = queued_image
+        self.end = end
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
 
         # Possible gun names
@@ -51,6 +56,9 @@ class GunTracker:
 
         with tqdm(files) as pbar:
             for file in pbar:
+                if self.check_stop():
+                    end.value = 1
+                    break
                 self.frame_number = self.apex_utils.extract_frame_number(file)
                 image = cv2.imread(file)  # Consider moving this to apexUtils
                 result = self.apex_utils.extract_text_from_image(image)
@@ -126,9 +134,29 @@ class GunTracker:
         print('Starting gun tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
-        self.apex_utils.display(queued_image, end, 'Gun Tracker')
+        self.apex_utils.display(queued_image, end, 'gun-tracker')
         self.track_gun(queued_image, end)
-        print('Finished damage tracker')
+        print('Finished gun tracker')
+
+    def start_in_thread(self):
+        print('!WEBPAGE! !ON!')
+        if self.running_thread and self.running_thread.is_alive():
+            print("Gun tracker is already running")
+            return
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread.start()
+
+    def check_stop(self):
+        if self.stop_event.is_set():
+            print("Stopping gun tracker")
+            print('!WEBPAGE! !OFF!')
+            return True
+        return False
+
+    def stop(self):
+        self.stop_event.set()
+        self.end.value = 1
 
 
 if __name__ == '__main__':

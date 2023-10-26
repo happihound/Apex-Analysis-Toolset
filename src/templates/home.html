@@ -12,10 +12,12 @@
     <!-- Load custom stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
-        <h1>{{welcome_message|safe }}</h1>
+    <title>Home</title>
 </head>
 
 <body>
+            <h1>{{welcome_message|safe }}</h1>
+
     <div class="container">
         <!-- Hidden div to store client ID -->
         <div id="client-id" style="display: none;">Home</div>

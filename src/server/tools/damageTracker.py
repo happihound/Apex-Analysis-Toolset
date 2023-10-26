@@ -1,4 +1,5 @@
 import cv2
+import threading
 import multiprocessing
 from tqdm import tqdm
 from util.apexUtils import ApexUtils as util
@@ -27,35 +28,51 @@ This describes the frame number and the damage dealt up to that frame.
 
 class DamageTracker:
     __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
-                 'results', 'result_image_number', 'path_to_images', 'apex_utils']
+                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'stop_event', 'running_thread', 'socketio']
 
-    def __init__(self) -> None:
+    def __init__(self, socketio) -> None:
+        self.stop_event = threading.Event()
         self.queued_image = None
+        self.running_thread = None
+        self.end = None
         self.frame_number = 0
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.apex_utils = util()
-        self.path_to_images = util().get_path_to_images()+"/playerDamage"
+        self.apex_utils = util(socketio=socketio)
+        self.path_to_images = self.apex_utils.get_path_to_images() + "/playerDamage"
+        self.running_thread = None
+        self.socketio = socketio
 
     def track_damage(self, queued_image, end) -> None:
+        self.end = end
         self.queued_image = queued_image
+
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
 
         with tqdm(files) as pbar:
             for file in pbar:
+                if self.check_stop():
+                    end.value = 1
+                    break
+
                 self.frame_number = self.apex_utils.extract_frame_number(file)
                 image = self.load_and_preprocess_image(file)
                 image = self.crop_icon_dynamic(image)
                 result_OCR = self.apex_utils.extract_numbers_from_image(image)
 
                 if self.process_result(result_OCR, pbar):
+                    if self.queued_image.full():
+                        self.queued_image.get()
                     self.queued_image.put(image)
+                else:
+                    self.results.append(self.results[-1])
+                    self.result_image_number.append(self.frame_number)
 
-        # print(f'found {self.match_count} total matches')
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Damage"], name='Player Damage')
         end.value = 1
+        print('!WEBPAGE! Finished damage tracker')
 
     def load_and_preprocess_image(self, file_path: str) -> np.ndarray:
         image = cv2.imread(file_path)
@@ -135,12 +152,29 @@ class DamageTracker:
         return True
 
     def main(self) -> None:
-        print('Starting damage tracker')
+        print('!WEBPAGE! Starting damage tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
-        self.apex_utils.display(queued_image, end, 'Damage Tracker')
+        self.apex_utils.display(queued_image, end, 'damage-tracker')
         self.track_damage(queued_image, end)
-        print('Finished damage tracker')
+        print('!WEBPAGE! Finished damage tracker')
+
+    def start_in_thread(self) -> None:
+        if self.running_thread and self.running_thread.is_alive():
+            print("!WEBPAGE! Damage tracker is already running")
+            return
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread.start()
+
+    def check_stop(self) -> bool:
+        if self.stop_event.is_set():
+            print("!WEBPAGE! Stopping damage tracker")
+            return True
+        return False
+
+    def stop(self) -> None:
+        self.stop_event.set()
 
 
 if __name__ == '__main__':

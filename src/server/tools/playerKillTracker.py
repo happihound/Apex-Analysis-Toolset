@@ -50,7 +50,7 @@ class KillTracker:
                     self.results.append(self.results[-1])
                     self.result_image_number.append(self.frame_number)
 
-        print(f'found {self.match_count} total matches')
+        print(f'!WEBPAGE! found {self.match_count} total matches')
         end.value = 1
         self.results = self.filter_values(self.results)
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
@@ -171,7 +171,7 @@ class KillTracker:
 
     def start_in_thread(self):
         if self.running_thread and self.running_thread.is_alive():
-            print("Kill tracker is already running")
+            print("!WEBPAGE! Kill tracker is already running")
             return
         self.stop_event.clear()
         self.running_thread = threading.Thread(target=self.main)
@@ -179,8 +179,7 @@ class KillTracker:
 
     def check_stop(self):
         if self.stop_event.is_set():
-            print("Stopping kill tracker")
-            print('!WEBPAGE! !TOGGLE!')
+            print("!WEBPAGE! Stopping kill tracker")
             return True
         return False
 
@@ -189,14 +188,12 @@ class KillTracker:
         self.end.value = 1
 
     def main(self):
-        print('!WEBPAGE! !TOGGLE!')
-        print('Starting kill tracker')
+        print('!WEBPAGE! Starting kill tracker')
         self.end = multiprocessing.Value("i", False)
         self.queued_image = multiprocessing.Queue(maxsize=2)
         self.apex_utils.display(self.queued_image, self.end, 'kill-tracker')
         self.track_kills(self.queued_image, self.end)
-        print('Finished kill tracker')
-        print('!WEBPAGE! !TOGGLE!')
+        print('!WEBPAGE! Finished kill tracker')
 
 
 if __name__ == '__main__':

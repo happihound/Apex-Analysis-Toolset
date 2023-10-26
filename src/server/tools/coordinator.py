@@ -2,7 +2,7 @@ import os
 import csv
 import threading
 import server.tools.damageTracker as damageTracker
-import server.tools.evoTracker as evoTracker
+from server.tools.evoTracker import EvoTracker
 import server.tools.killFeedNameFinder as killFeedNameFinder
 import server.tools.miniMapPlotter as miniMapPlotter
 import server.tools.playerGunTracker as playerGunTracker
@@ -46,8 +46,10 @@ class Coordinator:
         self.running_threads['kill-tracker'] = kill_tracker
         kill_tracker.start_in_thread()
 
-    def runPlayerGunTracker():
-        playerGunTracker.GunTracker().main()
+    def runPlayerGunTracker(self):
+        gun_tracker = playerGunTracker.GunTracker(self.socketio)
+        self.running_threads['gun-tracker'] = gun_tracker
+        gun_tracker.start_in_thread()
 
     def runPlayerHealthTrackerAndTeammates():
         playerHealthTracker.HealthTracker('/playerHealth').main()
@@ -76,11 +78,15 @@ class Coordinator:
         return
         # killFeedNameFinder.KillFeedNameFinder().main()
 
-    def runEvoTracker():
-        evoTracker.EvoTracker().main()
+    def runEvoTracker(self):
+        evoTracker = EvoTracker(self.socketio)
+        self.running_threads['evo-tracker'] = evoTracker
+        evoTracker.start_in_thread()
 
-    def runDamageTracker():
-        damageTracker.DamageTracker().main()
+    def runDamageTracker(self):
+        damage_tracker = damageTracker.DamageTracker(self.socketio)
+        self.running_threads['damage-tracker'] = damage_tracker
+        damage_tracker.start_in_thread()
 
     def runMiniMapPlotter(map, ratio):
         print("skipping mini map plotter")
@@ -91,11 +97,11 @@ class Coordinator:
         ZoneTimerTracker.ZoneTimerTracker().main()
 
     def cancel(self, operation_name):
-        print(f"Attempting to cancel {operation_name}")
+        print(f"!WEBPAGE! Attempting to cancel {operation_name}")
         if operation_name in self.running_threads:
             self.running_threads[operation_name].stop()
             del self.running_threads[operation_name]
-            print(f"Successfully cancelled {operation_name}")
+            print(f"!WEBPAGE! Successfully cancelled {operation_name}")
             return True
         return False
 

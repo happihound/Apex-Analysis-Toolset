@@ -83,7 +83,6 @@ class Video_Decomposition(Resource):
                 options[key] = False
         global coordinator_local
         coordinator_local.runVideoDecompositionTool(options)
-        print(options)
         selected_options = []
         for key, value in options.items():
             if value:
@@ -93,24 +92,42 @@ class Video_Decomposition(Resource):
 
 class KillTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Kill Tracker Tool', 'client_id': 'kill-tracker'}
-        return make_response(render_template('kill-tracker.html', **data_dict))
+        data_dict = {'title': 'Kill Tracker', 'client_id': 'kill-tracker'}
+        return make_response(render_template('default.html', **data_dict))
 
     def post(self):
         global coordinator_local
         coordinator_local.runPlayerKillTracker()
-        # return make_response(render_template('kill-tracker-output.html'))
 
 
 class PlayerGunTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Player Gun Tracker Tool'}
-        return make_response(render_template('player-gun-tracker.html', **data_dict))
+        data_dict = {'title': 'Gun Tracker', 'client_id': 'gun-tracker'}
+        return make_response(render_template('default.html', **data_dict))
 
     def post(self):
         global coordinator_local
         coordinator_local.runPlayerGunTracker()
-        return make_response(render_template('player-gun-tracker-output.html'))
+
+
+class DamageTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Damage Tracker', 'client_id': 'damage-tracker'}
+        return make_response(render_template('default.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runDamageTracker()
+
+
+class EvoTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Evo Tracker', 'client_id': 'evo-tracker'}
+        return make_response(render_template('default.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runEvoTracker()
 
 
 class CancelOperation(Resource):

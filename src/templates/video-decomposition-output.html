@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cancel-button.css') }}">
-
-
-    <title>Output Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+    
+    <title>Video Decomposition Output</title>
 </head>
 <body>
     <div class="container">
@@ -21,11 +21,8 @@
                 <!-- Selected options will be dynamically added here -->
             </ul>
         </div>
-        
-        <button class="collapsible collapsible-console">Console Output</button>
-        <div class="content">
-            <pre id="console-output"></pre>
-        </div>
+            <div id=insert_console class="console-output">
+
     </div>
 
     <script type="application/json" id="options-data">

@@ -14,12 +14,11 @@ class VideoDecompositionTool:
 
     def decompose_video(self, options):
         print('!WEBPAGE! Starting Video Decomposition Tool')
-        print('!WEBPAGE! !TOGGLE!')
         running_extractions = []
         high_quality = options['high_quality']
         async_mode = options['async_mode']
-        print(f"high_quality: {high_quality}")
-        print(f"async_mode: {async_mode}")
+        print(f"!WEBPAGE! high_quality: {high_quality}")
+        print(f"!WEBPAGE! async_mode: {async_mode}")
         options.pop('high_quality')
         options.pop('async_mode')
         to_extract = []
@@ -140,7 +139,7 @@ class VideoDecompositionTool:
             if to_extract is not None:
                 if output_name not in to_extract:
                     continue
-            print("Running extraction on: " + output_name)
+            print("!WEBPAGE! Running extraction on: " + output_name)
             output_path = os.path.join(basepath, output_name, f"{output_name}%04d.png")
             if async_mode:
                 process = ffmpeg.run_async(ffmpeg.output(
@@ -154,7 +153,7 @@ class VideoDecompositionTool:
                         return
                     time.sleep(0.1)
         if async_mode:
-            print("Waiting for all extractions to finish")
+            print("!WEBPAGE! Waiting for all extractions to finish")
             while len(self.running_extractions) > 0:
                 if self.check_stop():
                     return
@@ -164,12 +163,11 @@ class VideoDecompositionTool:
 
                 time.sleep(0.1)
 
-        print("Finished extracting frames")
-        print('!WEBPAGE! !TOGGLE!')
+        print("!WEBPAGE! Finished extracting frames")
 
     def start_in_thread(self, options):
         if self.running_thread and self.running_thread.is_alive():
-            print("A decomposition is already running")
+            print("!WEBPAGE! A decomposition is already running")
             return
         self.stop_event.clear()
         self.running_thread = threading.Thread(target=self.decompose_video, args=(options,))
@@ -177,16 +175,13 @@ class VideoDecompositionTool:
 
     def check_stop(self):
         if self.stop_event.is_set():
-            print("Stopping video decomposition tool")
-            print('!WEBPAGE! !TOGGLE!')
-
+            print("!WEBPAGE! Stopping video decomposition tool")
             self.kill()
             return True
         return False
 
     def kill(self):
         for process in self.running_extractions:
-            print("Killing process")
             process.communicate(str.encode("q"))
             process.terminate()
 
