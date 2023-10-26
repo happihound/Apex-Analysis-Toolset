@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('console_output', function (message) {
         console.log('Console Output received:', message.data);
         var consoleElement = document.getElementById('console-output');
-        consoleElement.textContent = message.data.join('\n');
+        consoleElement.textContent += message.data + '\n';
         //Cut the text if it goes over 12 lines
         var lines = consoleElement.textContent.split('\n');
         if (lines.length > 12) {

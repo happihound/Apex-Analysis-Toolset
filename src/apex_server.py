@@ -49,7 +49,7 @@ class DualOutput:
 
     def get_value_website(self):
         toggle = False
-        return_list = []
+        return_string = ""
         for line in self.cont_buffer.getvalue().splitlines():
             if "!ON!" in line:
                 toggle = True
@@ -58,16 +58,20 @@ class DualOutput:
                 toggle = False
                 continue
             if "!WEBPAGE!" in line or toggle:
-                return_list.append(line.replace("!WEBPAGE!", "").replace(
-                    "!TOGGLE!", "").replace("!ON!", "").replace("!OFF!", ""))
-        if len(return_list) == 0:
-            return
-        return return_list
+                return_string += '\n' + (line.replace("!WEBPAGE!", "").replace("!TOGGLE!",
+                                         "").replace("!ON!", "").replace("!OFF!", ""))
+        return_string = return_string[2:]
+        if len(return_string) == 0:
+            return None
+        self.clear()
+        self.flush()
+        return return_string
 
     def clear(self):
-        return
         self.buffer.seek(0)
         self.buffer.truncate()
+        self.cont_buffer.seek(0)
+        self.cont_buffer.truncate()
 
 
 class ConsoleOutput(Resource):
@@ -85,8 +89,11 @@ class ConsoleOutputForWebpages(Resource):
 sys.stdout = DualOutput(sys.stdout)
 sys.stderr = DualOutput(sys.stderr)
 
+has_run = False
+
 
 def emit_console_output():
+    has_run = True
     while True:
         console = get_website_console_output()
         if console is not None:
@@ -105,29 +112,42 @@ def connect():
 def handle_connect():
     print('Client connected')
     client_id = request.args.get('client_id')
-    socketio.start_background_task(emit_console_output)
+    if not has_run:
+        socketio.start_background_task(emit_console_output)
     print(f'Client {client_id} connected with {request.sid} as sessid')
 
 
 api.add_resource(server_api.Home, '/')
 
-api.add_resource(server_api.CancelOperation, '/cancel')
+api.add_resource(server_api.DamageTracker, '/damage-tracker')
+
+api.add_resource(server_api.EvoTracker, '/evo-tracker')
+
+# api.add_resource(server_api.KillFeedTracker, '/killfeed-tracker')
+
+# api.add_resource(server_api.MiniMapPlotter, '/minimap-plotter')
+
+api.add_resource(server_api.PlayerGunTracker, '/gun-tracker')
+
+api.add_resource(server_api.HealthTracker, '/health-tracker')
+
+api.add_resource(server_api.KillTracker, '/kill-tracker')
+
+api.add_resource(server_api.ShieldTracker, '/shield-tracker')
+
+api.add_resource(server_api.TacTracker, '/tac-tracker')
+
+api.add_resource(server_api.UltTracker, '/ult-tracker')
 
 api.add_resource(server_api.Video_Decomposition, '/video-decomposition')
+
+api.add_resource(server_api.ZoneTimerTracker, '/zone-tracker')
 
 api.add_resource(ConsoleOutput, '/running_console')
 
 api.add_resource(ConsoleOutputForWebpages, '/get-console-output-for-webpages')
 
-api.add_resource(server_api.KillTracker, '/kill-tracker')
-
-api.add_resource(server_api.PlayerGunTracker, '/gun-tracker')
-
-api.add_resource(server_api.DamageTracker, '/damage-tracker')
-
-api.add_resource(server_api.EvoTracker, '/evo-tracker')
-
-api.add_resource(server_api.HealthTracker, '/health-tracker')
+api.add_resource(server_api.CancelOperation, '/cancel')
 
 
 if __name__ == '__main__':

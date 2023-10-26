@@ -1,3 +1,4 @@
+import threading
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -10,32 +11,41 @@ from util.apexUtils import ApexUtils as util
 class TacTracker:
 
     __slots__ = ['path_to_images', 'queued_image', 'end', 'apex_utils',
-                 'frame_number', 'match_count', 'results', 'result_image_number']
+                 'frame_number', 'match_count', 'results', 'result_image_number', 'stop_event', 'running_thread', 'socketio', 'path']
 
-    def __init__(self):
+    def __init__(self, socketio):
         self.queued_image = None
+        self.stop_event = threading.Event()
+        self.socketio = socketio
+        self.running_thread = None
+        self.end = None
         self.frame_number = 0
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.apex_utils = util()
-        self.path_to_images = util().get_path_to_images() + "/playerTac"
+        self.apex_utils = util(socketio)
+        self.path = "/playerTac"
+        self.path_to_images = self.apex_utils.get_path_to_images() + "/playerTac"
 
     def track_tac(self, queued_image, end) -> None:
         self.end = end
         self.queued_image = queued_image
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
 
-        for file in tqdm(files):
-            self.frame_number = self.apex_utils.extract_frame_number(file)
-            image = cv2.imread(file)
-            # readtext(image, allowlist='0123456789secSEC', paragraph=False)
-            result = self.apex_utils.extract_text_from_image(image)
-            self.process_result(result)
-            self.queued_image.put(image)
+        with tqdm(files) as pbar:
+            for file in pbar:
+                if self.check_stop():
+                    end.value = 1
+                    break
+                self.frame_number = self.apex_utils.extract_frame_number(file)
+                image = cv2.imread(file)
+                # readtext(image, allowlist='0123456789secSEC', paragraph=False)
+                result = self.apex_utils.extract_text_from_image(image)
+                self.process_result(result)
+                self.queued_image.put(image)
 
         self.results = self.filter_values(self.results)
-        # print(f'found {self.match_count} total matches')
+        print(f'!WEBPAGE! found {self.match_count} total matches')
         end.value = 1
         # self.graph_filter_and_save(self.result_image_number, self.results)
 
@@ -78,17 +88,6 @@ class TacTracker:
         new_values.append(values[-1])
         return new_values
 
-    def graph_filter_and_save(self, frame_number, results) -> None:
-        x, y = self.smoothing(results, frame_number)
-        self.save_results()
-        return
-        plt.plot(x, y)
-        plt.xlabel("Time")
-        plt.ylabel("Cool Down")
-        plt.xlim([0, len(frame_number)])
-        plt.show()
-        plt.pause(99999)
-
     def save_results(self) -> None:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Tac"], name=self.path[1:])
@@ -99,13 +98,31 @@ class TacTracker:
         y_smooth = lowess(y, x, is_sorted=False, frac=lowess_frac, return_sorted=False)
         return x, y_smooth
 
+    def start_in_thread(self):
+        if self.running_thread and self.running_thread.is_alive():
+            print("!WEBPAGE! Tac tracker is already running")
+            return
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread.start()
+
+    def check_stop(self):
+        if self.stop_event.is_set():
+            print("!WEBPAGE! Stopping tac tracker")
+            return True
+        return False
+
+    def stop(self):
+        self.stop_event.set()
+        self.end.value = 1
+
     def main(self) -> None:
-        print('Starting tac tracker')
+        print('!WEBPAGE! Starting tac tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
-        self.apex_utils.display(queued_image, end, 'Tac Tracker')
+        self.apex_utils.display(queued_image, end, 'tac-tracker')
         self.track_tac(queued_image, end)
-        print('Finished tac tracker')
+        print('!WEBPAGE! Finished tac tracker')
 
 
 if __name__ == '__main__':

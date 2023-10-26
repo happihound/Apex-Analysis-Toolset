@@ -51,31 +51,25 @@ class Coordinator:
         self.running_threads['gun-tracker'] = gun_tracker
         gun_tracker.start_in_thread()
 
-    def runPlayerShieldTrackerAndTeammates():
-        playerShieldTracker.ShieldTracker('/playerShield').main()
-        playerShieldTracker.ShieldTracker('/teammate1Shield').main()
-        # playerShieldTracker.ShieldTracker('/teammate2Shield').main()
-
     def runHealthTracker(self, options):
         health_tracker = playerHealthTracker.HealthTracker(self.socketio)
         self.running_threads['health-tracker'] = health_tracker
         health_tracker.start_in_thread(options)
 
-    def runPlayerShieldTracker(self):
-        player_shield_tracker = playerShieldTracker.ShieldTracker('/playerShield', self.socketio)
-        self.running_threads['player-shield-tracker'] = player_shield_tracker
-        player_shield_tracker.start_in_thread()
+    def runShieldTracker(self, options):
+        shield_tracker = playerShieldTracker.ShieldTracker(self.socketio)
+        self.running_threads['shield-tracker'] = shield_tracker
+        shield_tracker.start_in_thread(options)
 
-    def runTeammate1ShieldTracker(self):
-        teammate1_shield_tracker = playerShieldTracker.ShieldTracker('/teammate1Shield', self.socketio)
-        self.running_threads['teammate1-shield-tracker'] = teammate1_shield_tracker
-        teammate1_shield_tracker.start_in_thread()
+    def runPlayerUltTracker(self):
+        ult_tracker = playerUltTracker.UltTracker(self.socketio)
+        self.running_threads['ult-tracker'] = ult_tracker
+        ult_tracker.start_in_thread()
 
-    def runPlayerUltTracker():
-        playerUltTracker.UltTracker().main()
-
-    def runPlayerTacFinder():
-        playerTacTracker.TacTracker().main()
+    def runPlayerTacTracker(self):
+        tac_tracker = playerTacTracker.TacTracker(self.socketio)
+        self.running_threads['tac-tracker'] = tac_tracker
+        tac_tracker.start_in_thread()
 
     def runKillFeedNameFinder():
         print("skipping kill feed name finder")
@@ -97,8 +91,10 @@ class Coordinator:
         return
         # miniMapPlotter.MiniMapPlotter(map, ratio).main()
 
-    def runZoneTimer():
-        ZoneTimerTracker.ZoneTimerTracker().main()
+    def runZoneTimer(self):
+        zone_tracker = ZoneTimerTracker.ZoneTimerTracker(self.socketio)
+        self.running_threads['zone-tracker'] = zone_tracker
+        zone_tracker.start_in_thread()
 
     def cancel(self, operation_name):
         print(f"!WEBPAGE! Attempting to cancel {operation_name}")

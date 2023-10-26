@@ -119,7 +119,6 @@ class HealthTracker:
                              headers=["Frame", "Health"], name=self.path)
 
     def main(self, options):
-        print('!WEBPAGE! Starting player health tracker')
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
         self.apex_utils.display(queued_image, end, 'health-tracker')
@@ -151,8 +150,3 @@ class HealthTracker:
     def stop(self):
         self.stop_event.set()
         self.end.value = 1
-
-
-if __name__ == "__main__":
-    health_tracker = HealthTracker('/playerHealth')
-    health_tracker.main()

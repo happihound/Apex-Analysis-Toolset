@@ -1,8 +1,6 @@
 from flask import Flask, jsonify, request
 import sys
 import io
-
-
 from server.tools.coordinator import *
 from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
 from flask import render_template, make_response
@@ -141,16 +139,85 @@ class HealthTracker(Resource):
         teammate_1 = request.form.get('Teammate1')
         teammate_2 = request.form.get('Teammate2')
         options = {
-            'playerShield': player,
+            'playerHealth': player,
             'teammate1Health': teammate_1,
             'teammate2Health': teammate_2
         }
+        selected_options = []
         for key, value in options.items():
             if value is None:
                 options[key] = False
+
         if not player and not teammate_1 and not teammate_2:
             return {'message': 'No players selected'}, 400
         coordinator_local.runHealthTracker(options)
+        for key, value in options.items():
+            if value:
+                selected_options.append(key)
+        data_dict = {'title': 'Health Tracker', 'client_id': 'health-tracker', 'options': selected_options}
+        print("Making response for multi health extract")
+        return (make_response(render_template('multi-extract-output.html', **data_dict)))
+
+
+class ShieldTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Shield Tracker', 'client_id': 'shield-tracker', 'extact_type': 'shield'}
+        return make_response(render_template('multi-extract.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        player = request.form.get('Player')
+        teammate_1 = request.form.get('Teammate1')
+        teammate_2 = request.form.get('Teammate2')
+        options = {
+            'playershield': player,
+            'teammate1shield': teammate_1,
+            'teammate2shield': teammate_2
+        }
+        selected_options = []
+        for key, value in options.items():
+            if value is None:
+                options[key] = False
+
+        if not player and not teammate_1 and not teammate_2:
+            return {'message': 'No players selected'}, 400
+        coordinator_local.runShieldTracker(options)
+        for key, value in options.items():
+            if value:
+                selected_options.append(key)
+        data_dict = {'title': 'Shield Tracker', 'client_id': 'shield-tracker', 'options': selected_options}
+        print("Making response for multi shield extract")
+        return (make_response(render_template('multi-extract-output.html', **data_dict)))
+
+
+class TacTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Tactical Tracker', 'client_id': 'tac-tracker'}
+        return make_response(render_template('default.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runPlayerTacTracker()
+
+
+class UltTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Ult Tracker', 'client_id': 'ult-tracker'}
+        return make_response(render_template('default.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runPlayerUltTracker()
+
+
+class ZoneTimerTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Zone Timer Tracker', 'client_id': 'zone-tracker'}
+        return make_response(render_template('default.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runZoneTimer()
 
 
 class CancelOperation(Resource):

@@ -1,3 +1,4 @@
+import threading
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,17 +10,19 @@ from util.apexUtils import ApexUtils as util
 class ShieldTracker:
 
     __slots__ = ['end', 'queued_image', 'frame_number', 'match_count',
-                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'path']
+                 'results', 'result_image_number', 'path_to_images', 'apex_utils', 'path', 'stop_event', 'running_thread', 'multipath', 'socketio']
 
-    def __init__(self, path):
+    def __init__(self, socketio):
         self.queued_image = None
         self.frame_number = 0
         self.match_count = 0
         self.results = [0]
         self.result_image_number = [0]
-        self.apex_utils = util()
-        self.path = path
-        self.path_to_images = util().get_path_to_images() + path
+        self.apex_utils = util(socketio=socketio)
+        self.end = None
+        self.stop_event = threading.Event()
+        self.running_thread = None
+        self.path_to_images = None
 
     def track_shield(self, queued_image, end) -> None:
         self.queued_image = queued_image
@@ -27,6 +30,9 @@ class ShieldTracker:
 
         with tqdm(files) as pbar:
             for file in pbar:
+                if self.check_stop():
+                    end.value = 1
+                    break
                 self.frame_number = self.apex_utils.extract_frame_number(file)
                 image = cv2.imread(file)
                 result = self.parse_shield(image)
@@ -114,15 +120,35 @@ class ShieldTracker:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Shield"], name=self.path[1:])
 
-    def main(self) -> None:
-        print('Starting player shield tracker')
+    def main(self, options) -> None:
         end = multiprocessing.Value("i", False)
         queued_image = multiprocessing.Queue()
-        self.apex_utils.display(queued_image, end, 'Health Tracker')
-        self.track_shield(queued_image, end)
-        print('Finished player shield tracker')
+        self.apex_utils.display(queued_image, end, 'shield-tracker')
+        for path in options:
+            print('!WEBPAGE! Starting player shield tracker for ' + path)
+            self.path = path
+            self.path_to_images = self.apex_utils.get_path_to_images() + path
+            self.track_shield(queued_image, end)
+            print('!WEBPAGE! Finished player shield tracker')
 
+    def start_in_thread(self, options):
+        if self.running_thread and self.running_thread.is_alive():
+            print("!WEBPAGE! Shield tracker is already running")
+            return
+        run_options = []
+        for key, value in options.items():
+            if value:
+                run_options.append(key)
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main, args=(run_options,))
+        self.running_thread.start()
 
-if __name__ == "__main__":
-    health_tracker = ShieldTracker('/playerShield')
-    health_tracker.main()
+    def check_stop(self):
+        if self.stop_event.is_set():
+            print("!WEBPAGE! Stopping Shield tracker")
+            return True
+        return False
+
+    def stop(self):
+        self.stop_event.set()
+        self.end.value = 1
