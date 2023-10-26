@@ -104,7 +104,9 @@ def connect():
 @ socketio.on('connect')
 def handle_connect():
     print('Client connected')
+    client_id = request.args.get('client_id')
     socketio.start_background_task(emit_console_output)
+    print(f'Client {client_id} connected with {request.sid} as sessid')
 
 
 api.add_resource(server_api.Home, '/')
@@ -124,6 +126,8 @@ api.add_resource(server_api.PlayerGunTracker, '/gun-tracker')
 api.add_resource(server_api.DamageTracker, '/damage-tracker')
 
 api.add_resource(server_api.EvoTracker, '/evo-tracker')
+
+api.add_resource(server_api.HealthTracker, '/health-tracker')
 
 
 if __name__ == '__main__':

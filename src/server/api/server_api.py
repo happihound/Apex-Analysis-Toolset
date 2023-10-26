@@ -130,6 +130,29 @@ class EvoTracker(Resource):
         coordinator_local.runEvoTracker()
 
 
+class HealthTracker(Resource):
+    def get(self):
+        data_dict = {'title': 'Health Tracker', 'client_id': 'health-tracker', 'extact_type': 'health'}
+        return make_response(render_template('multi-extract.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        player = request.form.get('Player')
+        teammate_1 = request.form.get('Teammate1')
+        teammate_2 = request.form.get('Teammate2')
+        options = {
+            'playerShield': player,
+            'teammate1Health': teammate_1,
+            'teammate2Health': teammate_2
+        }
+        for key, value in options.items():
+            if value is None:
+                options[key] = False
+        if not player and not teammate_1 and not teammate_2:
+            return {'message': 'No players selected'}, 400
+        coordinator_local.runHealthTracker(options)
+
+
 class CancelOperation(Resource):
     def post(self):
         # Get the referer header to determine the page from which the request was sent

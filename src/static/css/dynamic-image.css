@@ -18,3 +18,6 @@
   min-height: 20%;
 }
 
+#dynamicImage[src=""] {
+    display: none;
+}

@@ -51,21 +51,25 @@ class Coordinator:
         self.running_threads['gun-tracker'] = gun_tracker
         gun_tracker.start_in_thread()
 
-    def runPlayerHealthTrackerAndTeammates():
-        playerHealthTracker.HealthTracker('/playerHealth').main()
-        playerHealthTracker.HealthTracker('/teammate1Health').main()
-        # playerHealthTracker.HealthTracker('/teammate2Health').main()
-
     def runPlayerShieldTrackerAndTeammates():
         playerShieldTracker.ShieldTracker('/playerShield').main()
         playerShieldTracker.ShieldTracker('/teammate1Shield').main()
         # playerShieldTracker.ShieldTracker('/teammate2Shield').main()
 
-    def runPlayerHealthTracker():
-        playerHealthTracker.HealthTracker('/playerHealth').main()
+    def runHealthTracker(self, options):
+        health_tracker = playerHealthTracker.HealthTracker(self.socketio)
+        self.running_threads['health-tracker'] = health_tracker
+        health_tracker.start_in_thread(options)
 
-    def runPlayerShieldTracker():
-        playerShieldTracker.ShieldTracker('/playerShield').main()
+    def runPlayerShieldTracker(self):
+        player_shield_tracker = playerShieldTracker.ShieldTracker('/playerShield', self.socketio)
+        self.running_threads['player-shield-tracker'] = player_shield_tracker
+        player_shield_tracker.start_in_thread()
+
+    def runTeammate1ShieldTracker(self):
+        teammate1_shield_tracker = playerShieldTracker.ShieldTracker('/teammate1Shield', self.socketio)
+        self.running_threads['teammate1-shield-tracker'] = teammate1_shield_tracker
+        teammate1_shield_tracker.start_in_thread()
 
     def runPlayerUltTracker():
         playerUltTracker.UltTracker().main()
@@ -103,6 +107,7 @@ class Coordinator:
             del self.running_threads[operation_name]
             print(f"!WEBPAGE! Successfully cancelled {operation_name}")
             return True
+        print(f"!WEBPAGE! Could not find {operation_name} to cancel")
         return False
 
         # if __name__ == '__main__':

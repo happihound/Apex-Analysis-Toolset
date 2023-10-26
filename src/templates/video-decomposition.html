@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,17 +11,19 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/console.js') }}"></script>
     <script src="{{ url_for('static', filename='js/video-decomposition.js') }}"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
     <title>Video Decomposition</title>
 </head>
+
 <body>
     <div class="container">
         <h1>{{ title }}</h1>
 
         <form action="/video-decomposition" method="post" class="form-section">
             <div class="image-container">
-                <img src="{{ url_for('static', filename='images/Decomp_Key.jpg') }}" alt="Decomposition Key" class="responsive-img">
+                <img src="{{ url_for('static', filename='images/Decomp_Key.jpg') }}" alt="Decomposition Key"
+                    class="responsive-img">
             </div>
 
             <div class="accordion">
@@ -51,57 +54,57 @@
                 <!-- Checkboxes -->
                 <input type="checkbox" id="killFeed" class="section" name="killFeed" value="True">
                 <label for="killFeed">Kill Feed</label>
-			<br>
-			<input type="checkbox" id="PlayerEvo" class="section" name="PlayerEvo" value="True">
-			<label for="PlayerEvo">Player Evo</label>
-			<br>
-			<input type="checkbox" id="PlayerDamage" class="section" name="PlayerDamage" value="True">
-			<label for="PlayerDamage">Player Damage</label>
-			<br>
-			<input type="checkbox" id="miniMap" class="section" name="miniMap" value="True">
-			<label for="miniMap">Mini Map</label>
-			<br>
-			<input type="checkbox" id="PlayerGuns" class="section" name="PlayerGuns" value="True">
-			<label for="PlayerGuns">Player Guns</label>
-			<br>
-			<input type="checkbox" id="PlayerHealth" class="section" name="PlayerHealth" value="True">
-			<label for="PlayerHealth">Player Health</label>
-			<br>
-			<input type="checkbox" id="PlayerKills" class="section" name="PlayerKills" value="True">
-			<label for="PlayerKills">Player Kills</label>
-			<br>
-			<input type="checkbox" id="PlayerShield" class="section" name="PlayerShield" value="True">
-			<label for="PlayerShield">Player Shield</label>
-			<br>
-			<input type="checkbox" id="PlayerTac" class="section" name="PlayerTac" value="True">
-			<label for="PlayerTac">Player Tac</label>
-			<br>
-			<input type="checkbox" id="PlayerUlt" class="section" name="PlayerUlt" value="True">
-			<label for="PlayerUlt">Player Ult</label>
-			<br>
-			<input type="checkbox" id="Teammate1Health" class="section" name="Teammate1Health" value="True">
-			<label for="Teammate1Health">Teammate 1 Health</label>
-			<br>
-			<input type="checkbox" id="Teammate1Shield" class="section" name="Teammate1Shield" value="True">
-			<label for="Teammate1Shield">Teammate 1 Shield</label>
-			<br>
-			<input type="checkbox" id="Teammate2Health" class="section" name="Teammate2Health" value="True">
-			<label for="Teammate2Health">Teammate 2 Health</label>
-			<br>
-			<input type="checkbox" id="Teammate2Shield" class="section" name="Teammate2Shield" value="True">
-			<label for="Teammate2Shield">Teammate 2 Shield</label>
-			<br>
-			<input type="checkbox" id="ZoneTimer" class="section" name="ZoneTimer" value="True">
-			<label for="ZoneTimer">Zone Timer</label>
-			<br>
-			<input type="checkbox" id="frames" class="section" name="frames" value="True">
-			<label for="frames">Frames</label>
-			<br>
-			   <div class="button-container">
-                <button id="submitButton" class="submit-button">
-            <i class="fas fa-check-circle "></i> Run {{title}}
-        </button>
-    </div>
+                <br>
+                <input type="checkbox" id="PlayerEvo" class="section" name="PlayerEvo" value="True">
+                <label for="PlayerEvo">Player Evo</label>
+                <br>
+                <input type="checkbox" id="PlayerDamage" class="section" name="PlayerDamage" value="True">
+                <label for="PlayerDamage">Player Damage</label>
+                <br>
+                <input type="checkbox" id="miniMap" class="section" name="miniMap" value="True">
+                <label for="miniMap">Mini Map</label>
+                <br>
+                <input type="checkbox" id="PlayerGuns" class="section" name="PlayerGuns" value="True">
+                <label for="PlayerGuns">Player Guns</label>
+                <br>
+                <input type="checkbox" id="PlayerHealth" class="section" name="PlayerHealth" value="True">
+                <label for="PlayerHealth">Player Health</label>
+                <br>
+                <input type="checkbox" id="PlayerKills" class="section" name="PlayerKills" value="True">
+                <label for="PlayerKills">Player Kills</label>
+                <br>
+                <input type="checkbox" id="PlayerShield" class="section" name="PlayerShield" value="True">
+                <label for="PlayerShield">Player Shield</label>
+                <br>
+                <input type="checkbox" id="PlayerTac" class="section" name="PlayerTac" value="True">
+                <label for="PlayerTac">Player Tac</label>
+                <br>
+                <input type="checkbox" id="PlayerUlt" class="section" name="PlayerUlt" value="True">
+                <label for="PlayerUlt">Player Ult</label>
+                <br>
+                <input type="checkbox" id="Teammate1Health" class="section" name="Teammate1Health" value="True">
+                <label for="Teammate1Health">Teammate 1 Health</label>
+                <br>
+                <input type="checkbox" id="Teammate1Shield" class="section" name="Teammate1Shield" value="True">
+                <label for="Teammate1Shield">Teammate 1 Shield</label>
+                <br>
+                <input type="checkbox" id="Teammate2Health" class="section" name="Teammate2Health" value="True">
+                <label for="Teammate2Health">Teammate 2 Health</label>
+                <br>
+                <input type="checkbox" id="Teammate2Shield" class="section" name="Teammate2Shield" value="True">
+                <label for="Teammate2Shield">Teammate 2 Shield</label>
+                <br>
+                <input type="checkbox" id="ZoneTimer" class="section" name="ZoneTimer" value="True">
+                <label for="ZoneTimer">Zone Timer</label>
+                <br>
+                <input type="checkbox" id="frames" class="section" name="frames" value="True">
+                <label for="frames">Frames</label>
+                <br>
+                <div class="button-container">
+                    <button id="submitButton" class="submit-button">
+                        <i class="fas fa-check-circle "></i> Run {{title}}
+                    </button>
+                </div>
             </div>
         </form>
         <br>
@@ -109,4 +112,5 @@
         </div>
     </div>
 </body>
+
 </html>

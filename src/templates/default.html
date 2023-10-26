@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <div id="client-id" style="display: none;">{{client_id}}</div>
@@ -14,30 +15,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dynamic-image.css') }}">
     <title>{{title}}</title>
 </head>
+
 <body>
-        <h1>{{title}}</h1>
+    <h1>{{title}}</h1>
 
     <div class="container">
-    <div class="imageContainer">
-        <img id="dynamicImage" src=""  alt=""/>
-    </div>
+        <div class="imageContainer">
+            <img id="dynamicImage" src="" alt=" " />
+        </div>
         <div id="status"></div>
 
-    <div class="button-container">
-        <button id="cancelButton" class="cancel-button">
-            <i class="fas fa-times-circle"></i> Cancel Operation
-        </button>
-        <button id="submitButton" class="submit-button">
-            <i class="fas fa-check-circle "></i> Run {{title}}
-        </button>
-    </div>
-    <div id=insert_console class="console-output">
-    </div>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/dynamic-image.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/cancel-button.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
+        <div class="button-container">
+            <button id="cancelButton" class="cancel-button">
+                <i class="fas fa-times-circle"></i> Cancel Operation
+            </button>
+            <button id="submitButton" class="submit-button">
+                <i class="fas fa-check-circle "></i> Run {{title}}
+            </button>
+        </div>
+        <div id=insert_console class="console-output">
+        </div>
+        <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+        <script src="{{ url_for('static', filename='js/dynamic-image.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/cancel-button.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
 
 </body>
+
 </html>

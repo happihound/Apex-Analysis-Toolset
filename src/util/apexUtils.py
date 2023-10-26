@@ -48,9 +48,8 @@ class ApexUtils:
                     if not image_queue.empty():
                         image = image_queue.get()
                         self.send_image_to_client(client_id, image)
-                        self.socketio.sleep(0.01)
                     else:
-                        self.socketio.sleep(0.01)
+                        self.socketio.sleep(0.001)
 
     def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
         queued_image.put(cv2.imread('src/internal/default.png'))
