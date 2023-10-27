@@ -125,7 +125,7 @@ api.add_resource(server_api.EvoTracker, '/evo-tracker')
 
 # api.add_resource(server_api.KillFeedTracker, '/killfeed-tracker')
 
-# api.add_resource(server_api.MiniMapPlotter, '/minimap-plotter')
+api.add_resource(server_api.MiniMapPlotter, '/minimap-plotter')
 
 api.add_resource(server_api.PlayerGunTracker, '/gun-tracker')
 

@@ -128,6 +128,16 @@ class EvoTracker(Resource):
         coordinator_local.runEvoTracker()
 
 
+class MiniMapPlotter(Resource):
+    def get(self):
+        data_dict = {'title': 'MiniMap Plotter', 'client_id': 'minimap-plotter'}
+        return make_response(render_template('minimap-plotter.html', **data_dict))
+
+    def post(self):
+        global coordinator_local
+        coordinator_local.runMiniMapPlotter()
+
+
 class HealthTracker(Resource):
     def get(self):
         data_dict = {'title': 'Health Tracker', 'client_id': 'health-tracker', 'extact_type': 'health'}

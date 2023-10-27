@@ -29,12 +29,12 @@ class KillTracker:
         self.path_to_images = self.apex_utils.get_path_to_images() + "/playerKills"
         self.rolling_array = [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
 
-    def track_kills(self, queued_image, end) -> None:
+    def track_kills(self) -> None:
         files = self.apex_utils.load_files_from_directory(self.path_to_images)
         with tqdm(files) as pbar:
             for file in pbar:
                 if self.check_stop():
-                    end.value = 1
+                    self.end.value = 1
                     break
                 image = cv2.imread(file)
                 image = self.crop_icon_dynamic(image)
@@ -51,7 +51,7 @@ class KillTracker:
                     self.result_image_number.append(self.frame_number)
 
         print(f'!WEBPAGE! found {self.match_count} total matches')
-        end.value = 1
+        self.end.value = 1
         self.results = self.filter_values(self.results)
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
                              headers=["Frame", "Kills"], name='Player Kills')

@@ -1,4 +1,5 @@
 # cython: profile=True
+import threading
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -14,9 +15,9 @@ class MiniMapPlotter:
 
     __slots__ = ['map_name', 'game_image_ratio', 'game_map_image', 'mapKeyPoints', 'min_match_count',
                  'poly_tolerance', 'polysizeArray', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'apex_utils', 'results', 'resultImageNumber', 'start_color', 'end_color']
+                 'apex_utils', 'results', 'resultImageNumber', 'start_color', 'end_color', 'stop_event', 'running_thread', 'socketio', 'end']
 
-    def __init__(self, given_map, ratio, min_match_count=11, poly_tolerance=0.5, start_color=(0, 0, 255), end_color=(255, 0, 0)):
+    def __init__(self, given_map, ratio, socketio, min_match_count=11, poly_tolerance=0.5, start_color=(0, 0, 255), end_color=(255, 0, 0)):
         """
         Initialize the MiniMapPlotter with the given parameters.
 
@@ -26,9 +27,13 @@ class MiniMapPlotter:
         - min_match_count: Minimum number of matching key points between two images.
         - poly_tolerance: Tolerance for polygon size validation.
         """
+        self.socketio = socketio
+        self.running_thread = None
+        self.end = None
+        self.stop_event = threading.Event()
         self.start_color = np.array(start_color, dtype=np.float32)
         self.end_color = np.array(end_color, dtype=np.float32)
-        self.apex_utils = util()
+        self.apex_utils = util(socketio=socketio)
         self.map_name = given_map
         self.game_image_ratio = ratio
         self.game_map_image = None
@@ -53,26 +58,10 @@ class MiniMapPlotter:
         self.game_map_image = cv2.imread('src/internal/maps/'+self.game_image_ratio +
                                          '/map'+self.map_name+self.game_image_ratio+'.jpg')
 
-    def main(self):
-        """
-        Main execution function for the MiniMapPlotter.
-        """
-        if not self.map_name or not self.game_image_ratio:
-            raise ValueError('Map or ratio not set')
-
-        end = multiprocessing.Value('i', 0)
-        queued_image = multiprocessing.Queue()
-        self.setup_map()
-        self.apex_utils.display(queued_image, end, 'Minimap Plotter')
-        self.process_all_images(queued_image, end)
-
-    def process_all_images(self, queued_image, end):
+    def process_all_images(self):
         """
         Process all the mini map images.
 
-        Parameters:
-        - queued_image: Queue to hold the images for display.
-        - end: Signal to indicate the end of the process.
         """
         print('Starting matching')
         line = []
@@ -87,6 +76,9 @@ class MiniMapPlotter:
         # Loop through the mini map images
         with tqdm(files) as pbar:
             for idx, file in enumerate(pbar):
+                if self.check_stop():
+                    self.end.value = 1
+                    break
                 frame_number = self.apex_utils.extract_frame_number(file)
                 # Load the mini map images
                 print(flush=True)
@@ -97,15 +89,15 @@ class MiniMapPlotter:
                     line.append(center_point)
                     fraction = (file_timestamps[idx] - min_time) / (max_time - min_time)
                     color = self.get_color(fraction)
-                    display_image = self.edit_image(display_image, queued_image, line, color)
+                    display_image = self.edit_image(display_image, line, color)
                     self.resultImageNumber.append(frame_number)
                     self.results.append((center_point, color))
         if len(line) == 0:
-            print('No matches found, or no images in the folder. Make sure you run the extractMiniMap.py script first')
+            print('!WEBPAGE! No matches found, or no images in the folder. Make sure you run the extractMiniMap.py script first')
             return
         self.save(line)
 
-    def edit_image(self, display_image, queued_image, line, color):
+    def edit_image(self, display_image, line, color):
         """
         Edit the provided display image with the provided line points.
 
@@ -123,7 +115,7 @@ class MiniMapPlotter:
         # Explicitly convert the color tuple to integers
         color = tuple(map(int, color))
         modified_image = cv2.polylines(display_image, drawn_line, False, color, 3, cv2.LINE_AA)
-        queued_image.put(modified_image)
+        self.queued_image.put(modified_image)
         return modified_image
 
     def save(self, line):
@@ -163,7 +155,7 @@ class MiniMapPlotter:
                          for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
             self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
         except Exception as e:
-            print(f"Error loading key points: {e}")
+            print(f"!WEBPAGE!Error loading key points: {e}")
             raise
 
     def check_if_match(self, image):
@@ -188,7 +180,7 @@ class MiniMapPlotter:
             else:
                 return (False, False)
         except Exception as e:
-            print(f"Error matching image: {e}")
+            print(f"!WEBPAGE!Error matching image: {e}")
             return (False, False)
 
     def compute_homography(self, image, kp1, good_matches):
@@ -219,7 +211,7 @@ class MiniMapPlotter:
             center_point = (int(center_point[0][0][0]), int(center_point[0][0][1]))
             return center_point, rectangle_points
         except Exception as e:
-            print(f"Error computing homography: {e}")
+            print(f"!WEBPAGE!Error computing homography: {e}")
             return (False, False)
 
     def validate_match(self, rectangle_points):
@@ -245,7 +237,7 @@ class MiniMapPlotter:
             else:
                 return True
         except Exception as e:
-            print(f"Error validating match: {e}")
+            print(f"!WEBPAGE!Error validating match: {e}")
             return False
 
     def process_image(self, image_path):
@@ -272,8 +264,59 @@ class MiniMapPlotter:
             else:
                 return False
         except Exception as e:
-            print(f"Error processing image: {e}")
+            print(f"!WEBPAGE!Error processing image: {e}")
             return False
+
+    def start_in_thread(self, options):
+        if self.running_thread and self.running_thread.is_alive():
+            print("!WEBPAGE! Minimap plotter is already running")
+            return
+        self.stop_event.clear()
+        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread.start()
+
+    def check_stop(self):
+        if self.stop_event.is_set():
+            print("!WEBPAGE! Stopping Minimap plotter")
+            return True
+        return False
+
+    def stop(self):
+        self.stop_event.set()
+        self.end.value = 1
+
+    def main(self, options):
+        """
+        Main execution function for the MiniMapPlotter.
+        """
+        # if not self.map_name or not self.game_image_ratio:
+        #     raise ValueError('Map or ratio not set')
+        print('!WEBPAGE! Starting MiniMap Plotter')
+        self.map_name = options['map']
+        self.game_image_ratio = options['ratio']
+        try:
+            self.min_match_count = int(options['min_match_count'])
+        except Exception as e:
+            pass
+        try:
+            self.poly_tolerance = float(options['poly_tolerance'])
+        except Exception as e:
+            pass
+        try:
+            self.start_color = tuple(map(int, options['start_color'].split(',')))
+        except Exception as e:
+            pass
+        try:
+            self.end_color = tuple(map(int, options['end_color'].split(',')))
+        except Exception as e:
+            pass
+
+        self.end = multiprocessing.Value('i', 0)
+        self.queued_image = multiprocessing.Queue()
+        self.setup_map()
+        self.apex_utils.display(self.queued_image, self.end, 'minimap-plotter')
+        self.process_all_images()
+        print('!WEBPAGE! Finished MiniMap Plotter')
 
 
 if __name__ == '__main__':
