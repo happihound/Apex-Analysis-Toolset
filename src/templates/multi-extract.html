@@ -8,6 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/multi-extract.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
@@ -15,9 +16,9 @@
 </head>
 
 <body>
-    <h1>{{title}}</h1>
-
     <div class="container">
+        <h1>{{title}}</h1>
+
         <div id="status"></div>
         <form action="/{{client_id}}" method="post" class="form-section">
             <div class="accordion">
@@ -39,9 +40,6 @@
                         <label for="Teammate2">Teammate2</label>
                     </div>
                 </div>
-
-                <!-- Detailed Options -->
-                <!-- Add detailed options here if needed -->
             </div>
 
             <div class="button-container">
@@ -50,12 +48,14 @@
                 </button>
             </div>
         </form>
+        </br>
         <div id=insert_console class="console-output">
         </div>
-        <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-        <script src="{{ url_for('static', filename='js/console.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/multi-extract.js') }}"></script>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/multi-extract.js') }}"></script>
 
 </body>
 
