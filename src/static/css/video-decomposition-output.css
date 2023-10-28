@@ -56,3 +56,16 @@ h1 {
     background-color: #f9f9f9;
 }
 
+
+#mapImage {
+    width: auto;
+    height: 400px;
+    object-fit: contain;
+    min-width: 20%;
+    min-height: 20%;
+    margin: auto auto;
+}
+
+#mapImage[src=""] {
+    display: none;
+}

@@ -52,7 +52,7 @@ class ApexUtils:
                         self.socketio.sleep(0.001)
 
     def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
-        queued_image.put(cv2.imread('src/internal/default.png'))
+        queued_image.put(cv2.imread('src/server/internal/default.png'))
         self.image_sender.add_client(window_name,  queued_image)
 
     def __init__(self, socketio):

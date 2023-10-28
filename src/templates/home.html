@@ -1,38 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    
     <meta charset="UTF-8">
+    <div id="client-id" style="display: none;">home</div>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
-    <!-- Load external stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load custom stylesheets -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/default.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
-    <title>Home</title>
+    <title>Analytics Dashboard</title>
 </head>
 
 <body>
-            <h1>{{welcome_message|safe }}</h1>
-
     <div class="container">
-        <!-- Hidden div to store client ID -->
-        <div id="client-id" style="display: none;">Home</div>
-        <!-- Page content -->
-        <h2>{{explain_header|safe }}</h2>
-        <p>{{explain_body|safe }}</p>
+        <h1>{{welcome_message|safe}}</h1>
 
-        <div id=insert_console class="console-output">
+        <div class="content">
+            <div class="section">
+                <h2>{{explain_header|safe}}</h2>
+                <p>{{explain_body|safe}}</p>
+            </div>
 
+            <div class="section">
+                <h3>API Endpoints</h3>
+                <div class="button-container">
+                    <a href="/video-decomposition" class="submit-button"><i class="fas fa-video"></i>Video
+                        Decomposition</a>
+                    <a href="/damage-tracker" class="submit-button"><i class="fas fa-bolt"></i>Damage Tracker</a>
+                    <a href="/kill-tracker" class="submit-button"><i class="fas fa-skull-crossbones"></i>KillTracker</a>
+                    <a href="/gun-tracker" class="submit-button"><i class="fas fa-crosshairs"></i>Gun Tracker</a>
+                </div>
+                <div class="button-container">
+                    <a href="/evo-tracker" class="submit-button"><i class="fas fa-chart-line"></i>Evo Tracker</a>
+                    <a href="/health-tracker" class="submit-button"><i class="fas fa-heartbeat"></i>Health
+                        Tracker</a>
+                    <a href="/shield-tracker" class="submit-button"><i class="fas fa-shield-alt"></i>Shield
+                        Tracker</a>
+                </div>
+                <div class="button-container">
+                    <a href="/tac-tracker" class="submit-button"><i class="fas fa-shield-alt"></i>Tac Tracker</a>
+                    <a href="/ult-tracker" class="submit-button"><i class="fas fa-shield-alt"></i>Ult Tracker </a>
+                </div>
+                <div class="button-container">
+                    <a href="/zone-tracker" class="submit-button"><i class="fas fa-shield-alt"></i>Zone Tracker</a>
+                    <a href="/minimap-plotter" class="submit-button"><i class="fas fa-map"></i>Minimap Plotter</a>
+                </div>
+                <!-- Add more buttons as needed -->
+
+            </div>
         </div>
-        <!-- Load external scripts -->
-        <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
-        
-        <!-- Load custom scripts -->
-        <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+        <div id=insert_console class=" console-output">
+        </div>
     </div>
+
+    <!-- Load external scripts -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <!-- Load custom scripts -->
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
 </body>
+
 </html>

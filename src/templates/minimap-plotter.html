@@ -15,48 +15,61 @@
 </head>
 
 <body>
+    <div class="home-button-container">
+        <a href="/home" class="submit-button"><i class="fas fa-home"></i>Home</a>
+    </div>
     <h1>{{title}}</h1>
-    <img id="mapImage" src="" alt="Map Image" style="max-width: 300px; display: block; margin: 20px auto;">
+    <div class="image-container">
+        <img id="mapImage" src="" alt="Map Image">
+    </div>
     <div class="container">
-        <div class="dropdown">
-            <button class="dropbtn">Available Maps</button>
-            <div class="dropdown-content">
-                <input type="radio" id="brokenMoon" name="map" value="mapBM" data-ratio="">
-                <label for="brokenMoon">Broken Moon</label><br>
-
-                <input type="radio" id="olympus" name="map" value="mapOLY" data-ratio="">
-                <label for="olympus">Olympus</label><br>
-
-                <input type="radio" id="worldsEdge" name="map" value="mapWE" data-ratio="">
-                <label for="worldsEdge">Worlds Edge</label><br>
-
-                <input type="radio" id="kingsCanyon" name="map" value="mapKC" data-ratio="">
-                <label for="kingsCanyon">Kings Canyon</label><br>
-
-                <input type="radio" id="stormPoint" name="map" value="mapSP" data-ratio="">
-                <label for="stormPoint">Storm Point</label>
+        <form action="/minimap-plotter" method="post" class="form-section">
+            <div class="map_status">
+                <p><span id="map_status"></span></p>
             </div>
-        </div>
+            <div class="dropdown">
+                <button class="dropbtn">Available Maps</button>
+                <div class="dropdown-content">
+                    <input type="radio" id="brokenMoon" name="map" value="mapBM" data-ratio="">
+                    <label for="brokenMoon">Broken Moon</label><br>
 
-        <div class="dropdown">
-            <button class="dropbtn">Ratio</button>
-            <div class="dropdown-content">
-                <input type="radio" id="fourThree" name="ratio" value="4:3">
-                <label for="fourThree">4:3</label><br>
+                    <input type="radio" id="olympus" name="map" value="mapOLY" data-ratio="">
+                    <label for="olympus">Olympus</label><br>
 
-                <input type="radio" id="sixteenNine" name="ratio" value="16:9">
-                <label for="sixteenNine">16:9</label><br>
+                    <input type="radio" id="worldsEdge" name="map" value="mapWE" data-ratio="">
+                    <label for="worldsEdge">Worlds Edge</label><br>
 
-                <input type="radio" id="sixteenTen" name="ratio" value="16:10">
-                <label for="sixteenTen">16:10</label>
+                    <input type="radio" id="kingsCanyon" name="map" value="mapKC" data-ratio="">
+                    <label for="kingsCanyon">Kings Canyon</label><br>
+
+                    <input type="radio" id="stormPoint" name="map" value="mapSP" data-ratio="">
+                    <label for="stormPoint">Storm Point</label>
+                </div>
             </div>
-        </div>
 
-        <div class="button-container">
-            <button id="submitButton" class="submit-button">
-                <i class="fas fa-check-circle "></i> Run {{title}}
-            </button>
-        </div>
+            <div class="ratio_status">
+                <p><span id="ratio_status"></span></p>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">Ratio</button>
+                <div class="dropdown-content">
+                    <input type="radio" id="fourThree" name="ratio" value="4by3">
+                    <label for="fourThree">4:3</label><br>
+
+                    <input type="radio" id="sixteenNine" name="ratio" value="16by9">
+                    <label for="sixteenNine">16:9</label><br>
+
+                    <input type="radio" id="sixteenTen" name="ratio" value="16by10">
+                    <label for="sixteenTen">16:10</label>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button id="submitButton" class="submit-button">
+                    <i class="fas fa-check-circle "></i> Run {{title}}
+                </button>
+            </div>
+        </form>
         <div id=insert_console class="console-output">
         </div>
     </div>

@@ -72,8 +72,54 @@ h1 {
     background-color: #3e8e41;
 }
 
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 400px;
+    max-height: 400px;
+    width: 100%;
+    /* Ensure a width is set */
+}
+
 #mapImage {
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
+    width: auto;
+    height: 400px;
+    object-fit: contain;
+    min-width: 20%;
+    min-height: 20%;
+    margin:auto auto;
+}   
+
+#mapImage[src=""] {
+    display: none;
+}
+
+#dynamicImage {
+    width: auto;
+    height: 600px;
+    object-fit: contain;
+    min-width: 20%;
+    min-height: 20%;
+    margin:auto auto;
+}
+
+#dynamicImage[src=""] {
+    display: none;
+}
+
+.image-container2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 600px;
+    max-height: 600px;
+    width: 100%;
+    /* Ensure a width is set */
 }

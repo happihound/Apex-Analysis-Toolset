@@ -86,10 +86,10 @@ class Coordinator:
         self.running_threads['damage-tracker'] = damage_tracker
         damage_tracker.start_in_thread()
 
-    def runMiniMapPlotter(map, ratio):
-        print("skipping mini map plotter")
-        return
-        # miniMapPlotter.MiniMapPlotter(map, ratio).main()
+    def runMiniMapPlotter(self, options):
+        minimap_plotter = miniMapPlotter.MiniMapPlotter(self.socketio)
+        self.running_threads['minimap-plotter'] = minimap_plotter
+        minimap_plotter.start_in_thread(options)
 
     def runZoneTimer(self):
         zone_tracker = ZoneTimerTracker.ZoneTimerTracker(self.socketio)

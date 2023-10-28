@@ -16,9 +16,12 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>{{title}}</h1>
+    <div class="home-button-container">
+        <a href="/home" class="submit-button"><i class="fas fa-home"></i>Home</a>
+    </div>
+    <h1>{{title}}</h1>
 
+    <div class="container">
         <div id="status"></div>
         <form action="/{{client_id}}" method="post" class="form-section">
             <div class="accordion">

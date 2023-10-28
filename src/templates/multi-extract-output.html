@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cancel-button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dynamic-image.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/default.css')}}">
 
@@ -18,9 +21,11 @@
 </head>
 
 <body>
+    <div class="home-button-container">
+        <a href="/home" class="submit-button"><i class="fas fa-home"></i>Home</a>
+    </div>
+    <h1>{{ title }}</h1>
     <div class="container">
-        <h1>{{ title }}</h1>
-
         <div class="imageContainer">
             <img id="dynamicImage" src="" alt=" " />
         </div>
@@ -48,6 +53,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/multi-extract-output.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dynamic-image.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cancel-button.js') }}"></script>
 </body>
 
 </html>

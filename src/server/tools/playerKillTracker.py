@@ -192,7 +192,7 @@ class KillTracker:
         self.end = multiprocessing.Value("i", False)
         self.queued_image = multiprocessing.Queue(maxsize=2)
         self.apex_utils.display(self.queued_image, self.end, 'kill-tracker')
-        self.track_kills(self.queued_image, self.end)
+        self.track_kills()
         print('!WEBPAGE! Finished kill tracker')
 
 

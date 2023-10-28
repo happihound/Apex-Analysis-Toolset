@@ -15,9 +15,9 @@ class MiniMapPlotter:
 
     __slots__ = ['map_name', 'game_image_ratio', 'game_map_image', 'mapKeyPoints', 'min_match_count',
                  'poly_tolerance', 'polysizeArray', 'featureMappingAlgMiniMap', 'featureMatcher',
-                 'apex_utils', 'results', 'resultImageNumber', 'start_color', 'end_color', 'stop_event', 'running_thread', 'socketio', 'end']
+                 'apex_utils', 'results', 'resultImageNumber', 'start_color', 'end_color', 'stop_event', 'running_thread', 'socketio', 'end', 'queued_image']
 
-    def __init__(self, given_map, ratio, socketio, min_match_count=11, poly_tolerance=0.5, start_color=(0, 0, 255), end_color=(255, 0, 0)):
+    def __init__(self, socketio, min_match_count=11, poly_tolerance=0.5, start_color=(0, 0, 255), end_color=(255, 0, 0)):
         """
         Initialize the MiniMapPlotter with the given parameters.
 
@@ -34,8 +34,8 @@ class MiniMapPlotter:
         self.start_color = np.array(start_color, dtype=np.float32)
         self.end_color = np.array(end_color, dtype=np.float32)
         self.apex_utils = util(socketio=socketio)
-        self.map_name = given_map
-        self.game_image_ratio = ratio
+        self.map_name = None
+        self.game_image_ratio = None
         self.game_map_image = None
         self.mapKeyPoints = None
         self.min_match_count = min_match_count
@@ -53,9 +53,9 @@ class MiniMapPlotter:
         """
         Set up the map for matching.
         """
-        self.load_map_key_points('src/internal/packedKeypoints/'+self.game_image_ratio+'/' +
+        self.load_map_key_points('src/server/internal/packedKeypoints/'+self.game_image_ratio+'/' +
                                  self.map_name+self.game_image_ratio+'KeyPoints.npy')
-        self.game_map_image = cv2.imread('src/internal/maps/'+self.game_image_ratio +
+        self.game_map_image = cv2.imread('src/server/internal/maps/'+self.game_image_ratio +
                                          '/map'+self.map_name+self.game_image_ratio+'.jpg')
 
     def process_all_images(self):
@@ -63,7 +63,7 @@ class MiniMapPlotter:
         Process all the mini map images.
 
         """
-        print('Starting matching')
+        print('!WEBPAGE! Starting matching')
         line = []
         file_timestamps = []
         files = self.apex_utils.load_files_from_directory(directory=self.apex_utils.get_path_to_images()+"/miniMap")
@@ -81,8 +81,8 @@ class MiniMapPlotter:
                     break
                 frame_number = self.apex_utils.extract_frame_number(file)
                 # Load the mini map images
-                print(flush=True)
-                print("Computing Image " + file.split('\\')[1], end='\n\t')
+                # print(flush=True)
+                # print("Computing Image " + file.split('\\')[1], end='\n\t')
                 display_image = self.game_map_image
                 center_point = self.process_image(file)
                 if center_point is not False:
@@ -111,12 +111,19 @@ class MiniMapPlotter:
         """
         if not line:
             line.append(line[0])
-        drawn_line = [np.array(line, np.int32).reshape((-1, 1, 2))]
+        for idx, point in enumerate(line[:-1]):
+            color = tuple(map(int, self.results[idx][1]))
+            # print(f"Point: {point}, Next Point: {line[idx+1]}, Color: {color}")  # Debugging statement
+            modified_image = cv2.line(display_image, point, line[idx+1], color, 3, cv2.LINE_AA)
         # Explicitly convert the color tuple to integers
-        color = tuple(map(int, color))
-        modified_image = cv2.polylines(display_image, drawn_line, False, color, 3, cv2.LINE_AA)
-        self.queued_image.put(modified_image)
-        return modified_image
+        # color = tuple(map(int, color))
+        # modified_image = cv2.polylines(display_image, drawn_line, False, color, 3, cv2.LINE_AA)
+        try:
+            self.queued_image.put(modified_image)
+            return modified_image
+        except Exception as e:
+            self.queued_image.put(display_image)
+            return display_image
 
     def save(self, line):
         """
@@ -135,7 +142,7 @@ class MiniMapPlotter:
         final_output_base = self.game_map_image
         for idx, point in enumerate(line[:-1]):
             color = tuple(map(int, self.results[idx][1]))
-            print(f"Point: {point}, Next Point: {line[idx+1]}, Color: {color}")  # Debugging statement
+            # print(f"Point: {point}, Next Point: {line[idx+1]}, Color: {color}")  # Debugging statement
             cv2.line(final_output_base, point, line[idx+1], color, 3, cv2.LINE_AA)
         final_output_base = cv2.cvtColor(final_output_base, cv2.COLOR_BGR2RGB)
         plt.imsave('outputData/FINAL.jpg', final_output_base)
@@ -272,7 +279,7 @@ class MiniMapPlotter:
             print("!WEBPAGE! Minimap plotter is already running")
             return
         self.stop_event.clear()
-        self.running_thread = threading.Thread(target=self.main)
+        self.running_thread = threading.Thread(target=self.main, args=(options,), daemon=True)
         self.running_thread.start()
 
     def check_stop(self):

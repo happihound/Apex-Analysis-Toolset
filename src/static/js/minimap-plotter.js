@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const mapRadios = document.querySelectorAll('input[name="map"]');
     const ratioRadios = document.querySelectorAll('input[name="ratio"]');
     const mapImage = document.getElementById('mapImage');
+    var ratio_status = document.getElementById('ratio_status');
+    var map_status = document.getElementById('map_status');
 
     const updateImage = () => {
         const selectedMap = document.querySelector('input[name="map"]:checked');
@@ -16,6 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
             mapRadios.forEach(radio => {
                 radio.dataset.ratio = ratioValue;
             });
+        }
+        if (selectedMap) {
+            map_status.innerText = `Map: ${selectedMap.value}`;
+        }
+        if (selectedRatio) {
+            ratio_status.innerText = `Ratio: ${selectedRatio.value}`;
         }
     };
 

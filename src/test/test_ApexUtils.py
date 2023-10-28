@@ -3,7 +3,7 @@ import multiprocessing
 import os
 import csv
 from unittest.mock import patch, Mock
-from ApexUtils import ApexUtils
+from util.apexUtils import ApexUtils
 
 
 def test_display_starts_process():

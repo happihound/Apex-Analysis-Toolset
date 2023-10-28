@@ -108,7 +108,7 @@ def connect():
     print(f'Client {client_id} connected in image namespace with {request.sid} as sessid')
 
 
-@ socketio.on('connect')
+@socketio.on('connect')
 def handle_connect():
     print('Client connected')
     client_id = request.args.get('client_id')
@@ -117,7 +117,7 @@ def handle_connect():
     print(f'Client {client_id} connected with {request.sid} as sessid')
 
 
-api.add_resource(server_api.Home, '/')
+api.add_resource(server_api.Home, '/home')
 
 api.add_resource(server_api.DamageTracker, '/damage-tracker')
 

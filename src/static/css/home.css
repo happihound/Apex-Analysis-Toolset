@@ -11,7 +11,6 @@ h1 {
     color: #333;
 }
 
-
 .container {
     width: 80%;
     margin: auto auto;
@@ -23,7 +22,39 @@ h1 {
     padding-bottom: 18px;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+#status {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    margin: 5px;
+}
+
+.submit-button i {
+    margin-right: 10px;
+}
+
+.submit-button:hover {
+    background-color: #218838;
 }

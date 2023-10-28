@@ -134,8 +134,24 @@ class MiniMapPlotter(Resource):
         return make_response(render_template('minimap-plotter.html', **data_dict))
 
     def post(self):
+        map_name = request.form.get('map')
+        if not map_name:
+            return {'message': 'No map selected'}, 400
+        ratio = request.form.get('ratio')
+        if not ratio:
+            return {'message': 'No ratio selected'}, 400
+        options = {
+            'map': map_name[3:],
+            'ratio': ratio
+        }
         global coordinator_local
-        coordinator_local.runMiniMapPlotter()
+        coordinator_local.runMiniMapPlotter(options)
+        selected_options = []
+        for key, value in options.items():
+            if value:
+                selected_options.append(value)
+        data_dict = {'title': 'MiniMap Plotter', 'client_id': 'minimap-plotter', 'options': selected_options}
+        return (make_response(render_template('minimap-plotter-output.html', **data_dict)))
 
 
 class HealthTracker(Resource):
