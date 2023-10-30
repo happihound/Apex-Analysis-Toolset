@@ -53,10 +53,12 @@ class MiniMapPlotter:
         """
         Set up the map for matching.
         """
+        print("!WEBPAGE! Setting up map")
         self.load_map_key_points('src/server/internal/packedKeypoints/'+self.game_image_ratio+'/' +
                                  self.map_name+self.game_image_ratio+'KeyPoints.npy')
         self.game_map_image = cv2.imread('src/server/internal/maps/'+self.game_image_ratio +
                                          '/map'+self.map_name+self.game_image_ratio+'.jpg')
+        print("!WEBPAGE! Map setup complete")
 
     def process_all_images(self):
         """
@@ -155,15 +157,20 @@ class MiniMapPlotter:
         - keypoint_path: Path to the key points file.
         """
         try:
+            print("Loading key points")
             mapKeyPoints = np.load(keypoint_path).astype('float32')
+            print("Splitting key points")
             tempKeyPoints = mapKeyPoints[:, :7]
+            print("Loading descriptors")
             descriptors = np.array(mapKeyPoints[:, 7:])
+            print("Converting key points")
             keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
                          for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
+            print("Loading key points complete!")
             self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
         except Exception as e:
             print(f"!WEBPAGE!Error loading key points: {e}")
-            raise
+            raise e
 
     def check_if_match(self, image):
         """
@@ -301,22 +308,22 @@ class MiniMapPlotter:
         print('!WEBPAGE! Starting MiniMap Plotter')
         self.map_name = options['map']
         self.game_image_ratio = options['ratio']
-        try:
-            self.min_match_count = int(options['min_match_count'])
-        except Exception as e:
-            pass
-        try:
-            self.poly_tolerance = float(options['poly_tolerance'])
-        except Exception as e:
-            pass
-        try:
-            self.start_color = tuple(map(int, options['start_color'].split(',')))
-        except Exception as e:
-            pass
-        try:
-            self.end_color = tuple(map(int, options['end_color'].split(',')))
-        except Exception as e:
-            pass
+        # try:
+        #     self.min_match_count = int(options['min_match_count'])
+        # except Exception as e:
+        #     pass
+        # try:
+        #     self.poly_tolerance = float(options['poly_tolerance'])
+        # except Exception as e:
+        #     pass
+        # try:
+        #     self.start_color = tuple(map(int, options['start_color'].split(',')))
+        # except Exception as e:
+        #     pass
+        # try:
+        #     self.end_color = tuple(map(int, options['end_color'].split(',')))
+        # except Exception as e:
+        #     pass
 
         self.end = multiprocessing.Value('i', 0)
         self.queued_image = multiprocessing.Queue()
