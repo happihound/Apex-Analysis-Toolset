@@ -155,19 +155,27 @@ class MiniMapPlotter:
 
         Parameters:
         - keypoint_path: Path to the key points file.
+
         """
+        class mock_keypoints:
+            pt: cv2.typing.Point2f
+
+            def __init__(self, x, y):
+                self.pt = (x, y)
         try:
             print("Loading key points")
             mapKeyPoints = np.load(keypoint_path).astype('float32')
             print("Splitting key points")
-            tempKeyPoints = mapKeyPoints[:, :7]
+            tempKeyPoints = mapKeyPoints[:, :2]
             print("Loading descriptors")
             descriptors = np.array(mapKeyPoints[:, 7:])
             print("Converting key points")
-            keyPoints = [cv2.KeyPoint(x, y, _size, _angle, _response, int(_octave), int(_class_id))
-                         for x, y, _size, _angle, _response, _octave, _class_id in list(tempKeyPoints)]
+            temp_kp = []
+            for x, y in list(tempKeyPoints):
+                kp = mock_keypoints(x, y)
+                temp_kp.append(kp)
             print("Loading key points complete!")
-            self.mapKeyPoints = {'keyPoints': keyPoints, 'descriptors': descriptors}
+            self.mapKeyPoints = {'keyPoints': temp_kp, 'descriptors': descriptors}
         except Exception as e:
             print(f"!WEBPAGE!Error loading key points: {e}")
             raise e
