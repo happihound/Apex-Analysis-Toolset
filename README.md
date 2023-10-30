@@ -4,9 +4,14 @@
 
 Welcome to the comprehensive guide for the 'Apex Legends Analysis Tool' project. This suite of modules provides a detailed analysis of various gameplay metrics in the popular battle royale game, Apex Legends. By harnessing advanced image processing techniques, optical character recognition, and meticulous data management, this tool offers unparalleled insights into game dynamics and player performance. Developed in collaboration with topic experts in the apex analysis field, this project is a fully featured suite of tools.
 
+### New Features
+Recently updated, this program now has a web interface based on flask. It can be hosted locally by running the apex_server.py file and navigating to 
+https://127.0.0.1:5000/home. The web interface is still in development, but it is functional and can be used to run the analysis tool. Just be sure to install the requirments file, or it won't work. Contact me if you want the files needed to run the minimap plotter, otherwise, have fun!
+
 ## Table of Contents
 
 - [Apex Legends Analysis Tool README](#apex-legends-analysis-tool-readme)
+    - [New Features](#new-features)
   - [Table of Contents](#table-of-contents)
     - [Introduction ](#introduction-)
     - [Video Decomposition Tool ](#video-decomposition-tool-)

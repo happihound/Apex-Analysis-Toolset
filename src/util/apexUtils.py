@@ -1,29 +1,72 @@
+import base64
+import sys
+import io
 import csv
 import multiprocessing
 import os
+import threading
 import cv2
 import time
 import easyocr
 import glob
+from flask_socketio import SocketIO
 import numpy as np
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import easyocr
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from PIL import Image, ImageDraw, ImageFont
 
 
 class ApexUtils:
+    class WebSocketImageSender:
+        def __init__(self, socketio: SocketIO):
+            self.socketio = socketio
+            self.clients = {}  # Dictionary to store clients and their image queues
+            self.socketio.start_background_task(target=self.start_sending_images)
 
-    def __init__(self):
+        def add_client(self, client_id, image_queue):
+            if client_id not in self.clients:
+                self.clients[client_id] = image_queue
+                self.socketio.emit('new_client', {'client_id': client_id}, namespace='/image')
+                print(f'!WEBPAGE! Added client {client_id}')
+
+        def remove_client(self, client_id):
+            if client_id in self.clients:
+                del self.clients[client_id]
+
+        def send_image_to_client(self, client_id, image):
+            if client_id in self.clients:
+                retval, buffer = cv2.imencode('.jpg', image)
+                encoded_image = base64.b64encode(buffer).decode('utf-8')
+                # print(f'Sent image to client {client_id} with shape {image.shape}')
+                self.socketio.emit('image', {'client_id': client_id, 'image': encoded_image, 'altText': str(client_id)},
+                                   namespace='/image', room=client_id)
+
+        def start_sending_images(self):
+            while True:
+                for client_id, image_queue in list(self.clients.items()):
+                    if not image_queue.empty():
+                        image = image_queue.get()
+                        self.send_image_to_client(client_id, image)
+                    else:
+                        self.socketio.sleep(0.001)
+
+    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
+        queued_image.put(cv2.imread('src/server/internal/default.png'))
+        self.image_sender.add_client(window_name,  queued_image)
+
+    def __init__(self, socketio):
         self._reader = None
         self._model = None
+        self.socketio = socketio
+        self.image_sender = ApexUtils.WebSocketImageSender(socketio)
 
     @property
     def super_res_model(self):
         """Lazy loading of OpenCV's DNN super resolution model"""
         if self._model is None:
             self._model = cv2.dnn_superres.DnnSuperResImpl_create()
-            self._model.readModel('src/internal/super_resolution/EDSR_x4.pb')
+            self._model.readModel('src/server/internal/super_resolution/EDSR_x4.pb')
             self._model.setModel("edsr", 4)
         return self._model
 
@@ -35,7 +78,7 @@ class ApexUtils:
         return self._reader
 
     def extract_numbers_from_image(self, image):
-        image = self.super_res_model.upsample(image)
+        # image = self.super_res_model.upsample(image)
         result_OCR = self.reader.readtext(image, allowlist='0123456789', paragraph=False)
         return result_OCR
 
@@ -54,30 +97,7 @@ class ApexUtils:
 
     @staticmethod
     def get_path_to_images() -> str:
-        return 'src/internal/input/'
-
-    def display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
-        '''Displays images from a queue
-        queued_image: queue of images to be displayed
-        end: multiprocessing.Value that is set to 1 when the program is to end
-        window_name: name of the window to be displayed
-        '''
-        display_process = multiprocessing.Process(
-            target=self.run_display, args=(queued_image, end, window_name))
-        display_process.start()
-        return display_process
-
-    def run_display(self, queued_image: multiprocessing.Queue, end: multiprocessing.Value, window_name: str):
-        cv2.namedWindow(window_name)
-        cv2.imshow(window_name, cv2.imread('src/internal/default.png'))
-        while not end.value:
-            if not queued_image.empty():
-                image = queued_image.get()
-                # resize image if it is over 1000 pixels wide or tall
-                if image.shape[0] > 1000 or image.shape[1] > 1000:
-                    image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
-                cv2.imshow(window_name, image)
-            cv2.waitKey(1)
+        return 'src/server/internal/input/'
 
     def extract_text_from_image(self, image):
         # image = self.super_res_model.upsample(image)
@@ -106,7 +126,7 @@ class ApexUtils:
             data = lowess(data, frame, is_sorted=False, frac=lowess_frac,
                           it=lowess_it, delta=lowess_delta, return_sorted=False)
         if data is None or frame is None:
-            print("No data to save!")
+            print("!WEBPAGE! No data to save!")
             raise Exception
         try:
             if not name:
@@ -126,7 +146,7 @@ class ApexUtils:
                     writer.writerow([frame[i], data[i]])
                 print(f"Saved as {name}.csv")
         except FileExistsError:
-            print(f"{name}.csv already exists, it will be overwritten!")
+            print(f"!WEBPAGE! {name}.csv already exists, it will be overwritten!")
             # confirm = input("Are you sure you want to continue? (y/n): ")
             confirm = 'y'
             if confirm == 'y':
@@ -139,9 +159,9 @@ class ApexUtils:
                     writer.writerow(headers)
                     for i in range(len(data)):
                         writer.writerow([frame[i], data[i]])
-                    print(f"Saved as {name}.csv")
+                    print(f"!WEBPAGE! Saved as {name}.csv")
             else:
-                print("Save cancelled")
+                print("!WEBPAGE! Save cancelled")
                 return
         except Exception as e:
             print(f"Error: {e}")
@@ -157,7 +177,7 @@ class ApexUtils:
         # Iterate through each CSV file in the folder
         for filename in os.listdir(folder_path):
             if filename.endswith('.csv'):
-                print(f"Processing: {filename}")  # Print the filename being processed
+                print(f"!WEBPAGE! Processing: {filename}")  # Print the filename being processed
                 with open(os.path.join(folder_path, filename), 'r') as file:
                     reader = csv.reader(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     next(reader, None)  # Skip header row if it exists
@@ -212,7 +232,7 @@ class ApexUtils:
     @ staticmethod
     def visualize():
         csv_path = 'outputData/merged.csv'
-        frames_dir = 'src/internal/input/frames'
+        frames_dir = 'src/server/internal/input/frames'
         output_dir = 'outputData/frames'
 
         # Ensure the output directory exists

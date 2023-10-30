@@ -1,0 +1,125 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.container {
+    width: 80%;
+    margin: auto auto;
+    overflow: hidden;
+    padding: 0 18px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 18px;
+}
+
+#status {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin: 15px;
+}
+
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content input[type="radio"] {
+    margin: 10px;
+}
+
+.dropdown-content label {
+    cursor: pointer;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 400px;
+    max-height: 400px;
+    width: 100%;
+    /* Ensure a width is set */
+}
+
+#mapImage {
+    width: auto;
+    height: 400px;
+    object-fit: contain;
+    min-width: 20%;
+    min-height: 20%;
+    margin:auto auto;
+}   
+
+#mapImage[src=""] {
+    display: none;
+}
+
+#dynamicImage {
+    width: auto;
+    height: 600px;
+    object-fit: contain;
+    min-width: 20%;
+    min-height: 20%;
+    margin:auto auto;
+}
+
+#dynamicImage[src=""] {
+    display: none;
+}
+
+.image-container2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 600px;
+    max-height: 600px;
+    width: 100%;
+    /* Ensure a width is set */
+}

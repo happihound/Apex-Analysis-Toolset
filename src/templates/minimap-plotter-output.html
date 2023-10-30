@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <div id="client-id" style="display: none;">{{client_id}}</div>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cancel-button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dynamic-image.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/default.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/minimap-plotter.css') }}">
+
+    <title>{{ title }}</title>
+</head>
+
+<body>
+    <div class="home-button-container">
+        <a href="/home" class="submit-button"><i class="fas fa-home"></i>Home</a>
+    </div>
+    <h1>{{ title }}</h1>
+    <div class="container">
+        <div class="image-container2">
+            <img id="dynamicImage" src="" alt=" " />
+        </div>
+        <div id="status"></div>
+        <div id="selectedOptions" class="results">
+            <h2>Selected Options:</h2>
+            <ul id="optionsList">
+                <!-- Selected options will be dynamically added here -->
+            </ul>
+        </div>
+        <div id=insert_console class="console-output">
+
+        </div>
+
+        <script type="application/json" id="options-data">
+        {{ options | tojson }}
+    </script>
+    </div>
+    <div class="button-container">
+        <button id="cancelButton" class="cancel-button">
+            <i class="fas fa-times-circle"></i> Cancel Operation
+        </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/multi-extract-output.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dynamic-image.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cancel-button.js') }}"></script>
+
+</body>
+
+</html>

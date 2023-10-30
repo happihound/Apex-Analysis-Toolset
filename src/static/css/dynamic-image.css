@@ -1,0 +1,23 @@
+.imageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  max-height: 200px;
+  width: 100%; /* Ensure a width is set */
+}
+
+#dynamicImage {
+  width: 40%;
+  height: 200px;
+  object-fit: contain;
+  min-width: 20%;
+  min-height: 20%;
+}
+
+#dynamicImage[src=""] {
+    display: none;
+}

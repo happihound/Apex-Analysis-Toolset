@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <div id="client-id" style="display: none;">{{client_id}}</div>
+    <div id="submit-endpoint" style="display: none;">/{{client_id}}</div>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/video-decomposition-output.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/multi-extract.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit-button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <div class="home-button-container">
+        <a href="/home" class="submit-button"><i class="fas fa-home"></i>Home</a>
+    </div>
+    <h1>{{title}}</h1>
+
+    <div class="container">
+        <div id="status"></div>
+        <form action="/{{client_id}}" method="post" class="form-section">
+            <div class="accordion">
+                <!-- Simple Options -->
+                <button type="button" class="collapsible collapsible-extract">Click to Show Options</button>
+                <div class="content" style="display: none;">
+                    <div class="checkbox-container">
+                        <p>Who the program should extract the {{extact_type}} of</p>
+                        <input type="checkbox" id="selectAll">
+                        <label for="selectAll">Select All</label>
+                        <p>Options</p>
+                        <input type="checkbox" id="Player" class="section" name="Player" value="True">
+                        <label for="Player">Player</label>
+                        <br>
+                        <input type="checkbox" id="Teammate1" class="section" name="Teammate1" value="True">
+                        <label for="Teammate1">Teammate1</label>
+                        <br>
+                        <input type="checkbox" id="Teammate2" class="section" name="Teammate2" value="True">
+                        <label for="Teammate2">Teammate2</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button id="submitButton" class="submit-button">
+                    <i class="fas fa-check-circle "></i> Run {{title}}
+                </button>
+            </div>
+        </form>
+        </br>
+        <div id=insert_console class="console-output">
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/console.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/submit-button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/multi-extract.js') }}"></script>
+
+</body>
+
+</html>
