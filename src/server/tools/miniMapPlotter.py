@@ -3,7 +3,7 @@ import threading
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 import multiprocessing
 from tqdm import tqdm
 

@@ -6,7 +6,7 @@ import glob
 import multiprocessing
 import jellyfish
 import easyocr
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 from tqdm import tqdm
 plt.switch_backend('TKAgg')
 plt.bbox_inches = "tight"

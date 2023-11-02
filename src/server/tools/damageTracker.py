@@ -2,7 +2,7 @@ import cv2
 import threading
 import multiprocessing
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 import numpy as np
 ALLOWED_DAMAGE_DIFF = 400  # max difference between damage values
 

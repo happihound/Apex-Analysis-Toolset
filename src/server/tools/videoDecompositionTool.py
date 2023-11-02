@@ -3,7 +3,7 @@ import time
 import ffmpeg
 import glob
 import os
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 
 class VideoDecompositionTool:

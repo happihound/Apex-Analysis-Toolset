@@ -1,11 +1,11 @@
 from flask import Flask, jsonify, request
 import sys
 import io
-from server.tools.coordinator import *
+from src.server.tools.coordinator import *
 from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
 from flask import render_template, make_response
-from util.apexUtils import ApexUtils
-from server.tools.coordinator import Coordinator as coord
+from src.util.apexUtils import ApexUtils
+from src.server.tools.coordinator import Coordinator as coord
 
 global coordinator_local
 

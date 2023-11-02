@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import multiprocessing
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 
 class ZoneTimerTracker:

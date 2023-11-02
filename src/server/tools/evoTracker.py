@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 
 plt.switch_backend('TKAgg')

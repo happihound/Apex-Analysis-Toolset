@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 
 class ShieldTracker:
@@ -118,7 +118,7 @@ class ShieldTracker:
 
     def save_results(self) -> None:
         self.apex_utils.save(data=self.results, frame=self.result_image_number,
-                             headers=["Frame", "Shield"], name=self.path[1:])
+                             headers=["Frame", "Shield"], name=self.path)
 
     def main(self, options) -> None:
         end = multiprocessing.Value("i", False)

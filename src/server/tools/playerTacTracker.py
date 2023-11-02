@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from tqdm import tqdm
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 
 
 class TacTracker:

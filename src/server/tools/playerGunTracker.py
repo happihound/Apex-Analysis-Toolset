@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from tqdm import tqdm
 import jellyfish
-from util.apexUtils import ApexUtils as util
+from src.util.apexUtils import ApexUtils as util
 import cv2
 
 
