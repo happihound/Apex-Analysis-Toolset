@@ -27,8 +27,8 @@ class VideoDecompositionTool:
                 to_extract.append(key)
         # grab only keyframes to ensure frame quality and use GPU acceleration
         fileName = ''
-        # for file in glob.glob("video/" + '/*.mp4'):
-        for file in glob.glob("video/" + '/*.mkv'):
+        for file in glob.glob("video/" + '/*.mp4'):
+            # for file in glob.glob("video/" + '/*.mkv'):
             fileName = os.path.basename(file)
 
         # add the hqdn3d filter to remove noise from the video
@@ -112,7 +112,8 @@ class VideoDecompositionTool:
             }
 
         else:
-            stream = ffmpeg.input("video/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
+            stream = ffmpeg.input(
+                "video/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
             filter_chains = {
                 "miniMap": "crop=237:179:52:38",
                 "PlayerDamage": "crop=45:14:1785:74",
@@ -140,7 +141,8 @@ class VideoDecompositionTool:
                 if output_name not in to_extract:
                     continue
             print("!WEBPAGE! Running extraction on: " + output_name)
-            output_path = os.path.join(basepath, output_name, f"{output_name}%04d.png")
+            output_path = os.path.join(
+                basepath, output_name, f"{output_name}%04d.png")
             if async_mode:
                 process = ffmpeg.run_async(ffmpeg.output(
                     stream, output_path, vf=filter_chain), quiet=False, pipe_stdin=True)
@@ -170,7 +172,8 @@ class VideoDecompositionTool:
             print("!WEBPAGE! A decomposition is already running")
             return
         self.stop_event.clear()
-        self.running_thread = threading.Thread(target=self.decompose_video, args=(options,))
+        self.running_thread = threading.Thread(
+            target=self.decompose_video, args=(options,))
         self.running_thread.start()
 
     def check_stop(self):

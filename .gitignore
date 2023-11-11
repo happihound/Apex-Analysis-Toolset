@@ -167,3 +167,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 video/apex_edit.mkv
+video/video2.mkv
+video/New folder/apex_edit.mkv
