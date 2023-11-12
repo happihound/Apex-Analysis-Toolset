@@ -99,7 +99,8 @@ def run():
     def connect():
         client_id = request.args.get('client_id')
         join_room(client_id)
-        print(f'Client {client_id} connected in image namespace with {request.sid} as sessid')
+        print(
+            f'Client {client_id} connected in image namespace with {request.sid} as sessid')
 
     @socketio.on('connect')
     def handle_connect():
@@ -137,9 +138,12 @@ def run():
 
     api.add_resource(ConsoleOutput, '/running_console')
 
-    api.add_resource(ConsoleOutputForWebpages, '/get-console-output-for-webpages')
+    api.add_resource(ConsoleOutputForWebpages,
+                     '/get-console-output-for-webpages')
 
     api.add_resource(server_api.CancelOperation, '/cancel')
+
+    api.add_resource(server_api.CombineAllCSVs, '/combine-all-csvs')
 
     socketio.run(app, debug=True)
 

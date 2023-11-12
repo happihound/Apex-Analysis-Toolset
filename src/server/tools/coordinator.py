@@ -96,6 +96,9 @@ class Coordinator:
         self.running_threads['zone-tracker'] = zone_tracker
         zone_tracker.start_in_thread()
 
+    def runCombineAllCSVs(self):
+        util.ApexUtils.combineAllCSVs()
+
     def cancel(self, operation_name):
         print(f"!WEBPAGE! Attempting to cancel {operation_name}")
         if operation_name in self.running_threads:

@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 import sys
 import io
 from src.server.tools.coordinator import *
-from flask_restful import Resource, reqparse, request  # NOTE: Import from flask_restful, not python
+# NOTE: Import from flask_restful, not python
+from flask_restful import Resource, reqparse, request
 from flask import render_template, make_response
 from src.util.apexUtils import ApexUtils
 from src.server.tools.coordinator import Coordinator as coord
@@ -13,6 +14,14 @@ global coordinator_local
 def set_socketio(socketio1):
     global coordinator_local
     coordinator_local = coord(socketio=socketio1)
+
+
+class CombineAllCSVs(Resource):
+    def get(self):
+        global coordinator_local
+        coordinator_local.runCombineAllCSVs()
+        # redirect back to home page
+        return redirect('/home')
 
 
 class Home(Resource):
@@ -130,7 +139,8 @@ class EvoTracker(Resource):
 
 class MiniMapPlotter(Resource):
     def get(self):
-        data_dict = {'title': 'MiniMap Plotter', 'client_id': 'minimap-plotter'}
+        data_dict = {'title': 'MiniMap Plotter',
+                     'client_id': 'minimap-plotter'}
         return make_response(render_template('minimap-plotter.html', **data_dict))
 
     def post(self):
@@ -150,13 +160,15 @@ class MiniMapPlotter(Resource):
         for key, value in options.items():
             if value:
                 selected_options.append(value)
-        data_dict = {'title': 'MiniMap Plotter', 'client_id': 'minimap-plotter', 'options': selected_options}
+        data_dict = {'title': 'MiniMap Plotter',
+                     'client_id': 'minimap-plotter', 'options': selected_options}
         return (make_response(render_template('minimap-plotter-output.html', **data_dict)))
 
 
 class HealthTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Health Tracker', 'client_id': 'health-tracker', 'extact_type': 'health'}
+        data_dict = {'title': 'Health Tracker',
+                     'client_id': 'health-tracker', 'extact_type': 'health'}
         return make_response(render_template('multi-extract.html', **data_dict))
 
     def post(self):
@@ -180,14 +192,16 @@ class HealthTracker(Resource):
         for key, value in options.items():
             if value:
                 selected_options.append(key)
-        data_dict = {'title': 'Health Tracker', 'client_id': 'health-tracker', 'options': selected_options}
+        data_dict = {'title': 'Health Tracker',
+                     'client_id': 'health-tracker', 'options': selected_options}
         print("Making response for multi health extract")
         return (make_response(render_template('multi-extract-output.html', **data_dict)))
 
 
 class ShieldTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Shield Tracker', 'client_id': 'shield-tracker', 'extact_type': 'shield'}
+        data_dict = {'title': 'Shield Tracker',
+                     'client_id': 'shield-tracker', 'extact_type': 'shield'}
         return make_response(render_template('multi-extract.html', **data_dict))
 
     def post(self):
@@ -211,7 +225,8 @@ class ShieldTracker(Resource):
         for key, value in options.items():
             if value:
                 selected_options.append(key)
-        data_dict = {'title': 'Shield Tracker', 'client_id': 'shield-tracker', 'options': selected_options}
+        data_dict = {'title': 'Shield Tracker',
+                     'client_id': 'shield-tracker', 'options': selected_options}
         print("Making response for multi shield extract")
         return (make_response(render_template('multi-extract-output.html', **data_dict)))
 
@@ -238,7 +253,8 @@ class UltTracker(Resource):
 
 class ZoneTimerTracker(Resource):
     def get(self):
-        data_dict = {'title': 'Zone Timer Tracker', 'client_id': 'zone-tracker'}
+        data_dict = {'title': 'Zone Timer Tracker',
+                     'client_id': 'zone-tracker'}
         return make_response(render_template('default.html', **data_dict))
 
     def post(self):

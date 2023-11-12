@@ -1,9 +1,11 @@
 import threading
 import time
+import cv2
 import ffmpeg
 import glob
 import os
 from src.util.apexUtils import ApexUtils as util
+# from super_resolution import cartoon_upsampling_4x
 
 
 class VideoDecompositionTool:
@@ -93,21 +95,21 @@ class VideoDecompositionTool:
        # run the cropping procedure on all parts simultaneously
         if high_quality:
             filter_chains = {
-                "miniMap": "crop=237:179:52:38,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerDamage": "crop=45:14:1785:74,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerGuns": "crop=337:24:1509:1040,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerHealth": "crop=244:12:176:1025,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerKills": "crop=45:14:1635:74,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerShield": "crop=234:8:176:1017,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerTac": "crop=70:29:582:1043,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerUlt": "crop=45:19:938:1046,hqdn3d,select=eq(pict_type\,I)",
-                "Teammate1Health": "crop=160:8:139:932,hqdn3d,select=eq(pict_type\,I)",
-                "Teammate1Shield": "crop=160:7:139:926,hqdn3d,select=eq(pict_type\,I)",
-                "Teammate2Health": "crop=160:8:139:882,hqdn3d,select=eq(pict_type\,I)",
-                "Teammate2Shield": "crop=164:8:139:876,hqdn3d,select=eq(pict_type\,I)",
-                "ZoneTimer": "crop=240:65:50:219,hqdn3d,select=eq(pict_type\,I)",
+                "miniMap": "crop=207:187:44:39,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerDamage": "crop=40:22:1547:73,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerGuns": "crop=256:20:1322:898,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerHealth": "crop=200:10:153:879,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerKills": "crop=29:22:1425:73,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerShield": "crop=201:6:153:871,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerTac": "crop=53:17:515:902,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerUlt": "crop=33:18:814:902,hqdn3d,select=eq(pict_type\,I)",
+                "Teammate1Health": "crop=139:7:120:782,hqdn3d,select=eq(pict_type\,I)",
+                "Teammate1Shield": "crop=136:6:120:777,hqdn3d,select=eq(pict_type\,I)",
+                "Teammate2Health": "crop=139:7:120:731,hqdn3d,select=eq(pict_type\,I)",
+                "Teammate2Shield": "crop=136:6:120:726,hqdn3d,select=eq(pict_type\,I)",
+                "ZoneTimer": "crop=94:30:126:243,hqdn3d,select=eq(pict_type\,I)",
                 "killFeed": "crop=433:100:1387:155,hqdn3d,select=eq(pict_type\,I)",
-                "PlayerEvo": "crop=35:19:347:965,hqdn3d,select=eq(pict_type\,I)",
+                "PlayerEvo": "crop=30:14:302:819,hqdn3d,select=eq(pict_type\,I)",
                 "frames": "hqdn3d,select=eq(pict_type\,I)"
             }
 
@@ -115,27 +117,25 @@ class VideoDecompositionTool:
             stream = ffmpeg.input(
                 "video/"+fileName, skip_frame='nokey', vsync=0, hwaccel='cuda')
             filter_chains = {
-                "miniMap": "crop=237:179:52:38",
-                "PlayerDamage": "crop=45:14:1785:74",
-                "PlayerGuns": "crop=337:24:1509:1040",
-                "PlayerHealth": "crop=244:12:176:1025",
-                "PlayerKills": "crop=45:14:1635:74",
-                "PlayerShield": "crop=234:8:176:1017",
-                "PlayerTac": "crop=70:29:582:1043",
-                "PlayerUlt": "crop=45:19:938:1046",
-                "Teammate1Health": "crop=160:8:139:932",
-                "Teammate1Shield": "crop=160:7:139:926",
-                "Teammate2Health": "crop=160:8:139:882",
-                "Teammate2Shield": "crop=164:8:139:876",
-                "ZoneTimer": "crop=240:65:50:219",
+                "miniMap": "crop=207:187:44:39",
+                "PlayerDamage": "crop=40:22:1547:73",
+                "PlayerGuns": "crop=256:20:1322:898",
+                "PlayerHealth": "crop=200:10:153:879",
+                "PlayerKills": "crop=29:22:1425:73",
+                "PlayerShield": "crop=201:6:153:871",
+                "PlayerTac": "crop=53:17:515:902",
+                "PlayerUlt": "crop=33:18:814:902",
+                "Teammate1Health": "crop=139:7:120:782",
+                "Teammate1Shield": "crop=136:6:120:777",
+                "Teammate2Health": "crop=139:7:120:731",
+                "Teammate2Shield": "crop=136:6:120:726",
+                "ZoneTimer": "crop=94:30:126:243",
                 "killFeed": "crop=433:100:1387:155",
-                "PlayerEvo": "crop=35:19:347:965",
+                "PlayerEvo": "crop=30:14:302:819",
                 "frames": "null"
             }
 
         for output_name, filter_chain in filter_chains.items():
-            if self.check_stop():
-                return
             # only extract the frames on the selected output folders
             if to_extract is not None:
                 if output_name not in to_extract:
@@ -164,6 +164,17 @@ class VideoDecompositionTool:
                         self.running_extractions.remove(process)
 
                 time.sleep(0.1)
+        # if high_quality:
+        #     print("!WEBPAGE! Starting upscaling")
+        #     for output_name, output_path in output_paths.items():
+        #         if output_name not in to_extract:
+        #             continue
+        #         if output_name == "frames":
+        #             continue
+        #         print("!WEBPAGE! Upscaling: " + output_name)
+        #         for file in glob.glob(output_path + '/*.png'):
+        #             image = cartoon_upsampling_4x(file)
+        #             cv2.imwrite(file, image)
 
         print("!WEBPAGE! Finished extracting frames")
 
